@@ -2,10 +2,12 @@
 
 #include <cassert>
 
+#include "src/bindings/convert.h"
 #include "src/bindings/gpubuffer.h"
 #include "src/bindings/gpucommandbuffer.h"
 #include "src/bindings/gpucommandencoder.h"
 #include "src/bindings/gpuqueue.h"
+#include "src/bindings/gputexture.h"
 #include "src/utils/debug.h"
 
 namespace wgpu {
@@ -127,8 +129,21 @@ interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(
 }
 
 interop::Interface<interop::GPUTexture> GPUDevice::createTexture(
-    Napi::Env, interop::GPUTextureDescriptor descriptor) {
-  UNIMPLEMENTED();
+    Napi::Env env, interop::GPUTextureDescriptor descriptor) {
+  // TODO: Add proper converters, avoid static_cast
+  wgpu::TextureDescriptor desc{};
+  desc.label = descriptor.label.c_str();
+  desc.usage = static_cast<wgpu::TextureUsage>(descriptor.usage);
+  desc.dimension = static_cast<wgpu::TextureDimension>(descriptor.dimension);
+  if (!Convert(desc.size, descriptor.size)) {
+    Napi::Error::New(env, "invalid argument").ThrowAsJavaScriptException();
+    return {};
+  }
+  desc.format = static_cast<wgpu::TextureFormat>(descriptor.format);
+  desc.mipLevelCount = descriptor.mipLevelCount;
+  desc.sampleCount = descriptor.sampleCount;
+  return interop::GPUTexture::Create<GPUTexture>(env,
+                                                 device_.CreateTexture(&desc));
 }
 
 interop::Interface<interop::GPUSampler> GPUDevice::createSampler(

@@ -2,9 +2,11 @@
 
 #include <cassert>
 
+#include "src/bindings/convert.h"
 #include "src/bindings/gpu.h"
 #include "src/bindings/gpubuffer.h"
 #include "src/bindings/gpucommandbuffer.h"
+#include "src/bindings/gputexture.h"
 #include "src/utils/debug.h"
 
 namespace wgpu {
@@ -40,9 +42,24 @@ void GPUCommandEncoder::copyBufferToBuffer(
 }
 
 void GPUCommandEncoder::copyBufferToTexture(
-    Napi::Env, interop::GPUImageCopyBuffer source,
+    Napi::Env env, interop::GPUImageCopyBuffer source,
     interop::GPUImageCopyTexture destination, interop::GPUExtent3D copySize) {
-  UNIMPLEMENTED();
+  wgpu::ImageCopyBuffer src{};
+  src.buffer = *source.buffer.As<GPUBuffer>();
+  src.layout.offset = source.offset;
+  src.layout.bytesPerRow = source.bytesPerRow;
+  src.layout.rowsPerImage = source.rowsPerImage;
+  wgpu::ImageCopyTexture dst{};
+  dst.texture = *destination.texture.As<GPUTexture>();
+  dst.mipLevel = destination.mipLevel;
+  wgpu::Extent3D size{};
+  if (!Convert(dst.origin, destination.origin) ||  //
+      !Convert(dst.aspect, destination.aspect) ||  //
+      !Convert(size, copySize)) {
+    Napi::Error::New(env, "invalid argument").ThrowAsJavaScriptException();
+    return;
+  }
+  cmd_enc_.CopyBufferToTexture(&src, &dst, &size);
 }
 
 void GPUCommandEncoder::copyTextureToBuffer(
