@@ -1,0 +1,21 @@
+[submodule "third_party/gpuweb"]
+	path = third_party/gpuweb
+	url = https://github.com/gpuweb/gpuweb.git
+[submodule "third_party/dawn"]
+	path = third_party/dawn
+	url = https://dawn.googlesource.com/dawn
+[submodule "third_party/tint"]
+	path = third_party/tint
+	url = https://dawn.googlesource.com/tint
+[submodule "third_party/node-addon-api"]
+	path = third_party/node-addon-api
+	url = https://github.com/nodejs/node-addon-api.git
+[submodule "third_party/webidl-napi"]
+	path = third_party/webidl-napi
+	url = https://github.com/nodejs/webidl-napi.git
+[submodule "third_party/spirv-tools"]
+	path = third_party/spirv-tools
+	url = https://github.com/KhronosGroup/SPIRV-Tools.git
+[submodule "third_party/spirv-headers"]
+	path = third_party/spirv-headers
+	url = https://github.com/KhronosGroup/SPIRV-Headers.git

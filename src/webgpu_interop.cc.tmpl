@@ -1,0 +1,218 @@
+{{- Include "webgpu_interop_common.tmpl" -}}
+
+#include "webgpu_interop.h"
+
+#include <unordered_map>
+
+namespace wgpu {
+namespace interop {
+
+namespace {
+
+{{template "Wrappers" $}}
+
+}  // namespace
+
+{{ range $ := .Declarations}}
+{{-        if IsDictionary $}}{{template "Dictionary" $}}
+{{-   else if IsInterface  $}}{{template "Interface"  $}}
+{{-   else if IsEnum       $}}{{template "Enum"       $}}
+{{-   end}}
+{{- end}}
+
+
+Napi::Object InitWebGPUInterfaces(Napi::Env env, Napi::Object exports) {
+  auto* wrapper = Wrappers::Init(env);
+  auto global = env.Global();
+{{ range $ := .Declarations}}
+{{-   if IsInterface $}}
+  global.Set(Napi::String::New(env, "{{$.Name}}"), wrapper->{{$.Name}}_.klass);
+{{-   end}}
+{{- end}}
+  return exports;
+}
+
+}  // namespace interop
+}  // namespace wgpu
+
+{{- /**********************************************************************/ -}}
+
+{{- define "Dictionary"}}
+{{$.Name}} Serializer<{{$.Name}}>::Unmarshal(Napi::Value value) {
+  auto object = value.ToObject();
+  return {{$.Name}}{
+{{- template "UnmarshalDictionaryMembers" $}}
+  };
+}
+
+Napi::Value Serializer<{{$.Name}}>::Marshal(Napi::Env env, {{$.Name}} value) {
+  auto object = Napi::Object::New(env);
+{{- template "MarshalDictionaryMembers" $}}
+  return object;
+}
+{{ end}}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "UnmarshalDictionaryMembers"}}
+{{-    if $.Inherits}}{{template "UnmarshalDictionaryMembers" (Lookup $.Inherits)}}{{end}}
+{{-    range $m := $.Members}}
+    interop::Unmarshal<{{template "Type" $m.Type}}>(object.Get("{{$m.Name}}")),
+{{-    end}}
+{{- end}}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "MarshalDictionaryMembers"}}
+{{-    if $.Inherits}}{{template "MarshalDictionaryMembers" (Lookup $.Inherits)}}{{end}}
+{{-    range $m := $.Members}}
+  object.Set(Napi::String::New(env, "{{$m.Name}}"), interop::Marshal(env, value.{{$m.Name}}));
+{{-    end}}
+{{- end}}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "Wrappers"}}
+class Wrappers {
+  Wrappers(Napi::Env env) {
+{{-   range $ := .Declarations}}
+{{-     if IsInterface $}}
+    {{$.Name}}_.klass = W{{$.Name}}::Class(env);
+    {{$.Name}}_.ctor = Napi::Persistent({{$.Name}}_.klass);
+{{-     end}}
+{{-   end}}
+  }
+
+  static Wrappers* instance;
+
+public:
+  struct Wrapper {
+    Napi::Function klass;
+    Napi::FunctionReference ctor;
+  };
+
+{{-   range $ := .Declarations}}
+{{-     if IsInterface $}}{{template "InterfaceWrapper" $}}
+{{-     end}}
+{{-   end}}
+
+  static Wrappers* Init(Napi::Env env) {
+    instance = new Wrappers(env);
+    return instance;
+  }
+
+  static void Term(Napi::Env env) {
+    delete instance;
+    instance = nullptr;
+  }
+
+  static Wrappers* For(Napi::Env env) {
+    return instance;
+  }
+
+{{   range $ := .Declarations}}
+{{-     if IsInterface $}}
+  Wrapper {{$.Name}}_;
+{{-     end}}
+{{-   end}}
+};
+
+Wrappers* Wrappers::instance = nullptr;
+{{- end}}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "InterfaceWrapper"}}
+  struct W{{$.Name}} : public Napi::ObjectWrap<W{{$.Name}}> {
+    std::unique_ptr<{{$.Name}}> impl;
+
+    static Napi::Function Class(Napi::Env env) {
+      return DefineClass(env, "{{$.Name}}", {
+{{-  range $m := MethodsOf $}}
+        InstanceMethod("{{$m.Name}}", &W{{$.Name}}::{{$m.Name}}),
+{{-  end}}
+{{-  range $a := AttributesOf $}}
+        InstanceAccessor("{{$a.Name}}", &W{{$.Name}}::get{{Title $a.Name}},
+{{-    if $a.Readonly}} nullptr{{else}} &W{{$.Name}}::set{{Title $a.Name}}{{end -}}
+        ),
+{{-  end}}
+{{-  range $c := ConstantsOf $}}
+        StaticValue("{{$c.Name}}", Marshal(env, {{$.Name}}::{{$c.Name}})),
+{{-  end}}
+      });
+    }
+
+    W{{$.Name}}(const Napi::CallbackInfo& info) : ObjectWrap(info) {}
+{{-  range $m := MethodsOf $}}
+    Napi::Value {{$m.Name}}(const Napi::CallbackInfo& info) {
+      {{/* indent */}}
+{{-    if not (IsUndefinedType $m.Type) }}auto result = {{end}}impl->{{$m.Name}}(info.Env()
+{{-      range $i, $p := $m.Parameters}},
+        {{/* indent */}}
+{{-        if $p.Optional}}info[{{$i}}].IsUndefined() ? std::optional<{{template "Type" $p.Type}}>{} : {{end -}}
+        Serializer<{{template "Type" $p.Type}}>::Unmarshal(info[{{$i}}])
+{{-      end -}}
+        );
+      {{/* indent */ -}}
+{{-    if   IsUndefinedType $m.Type}}return info.Env().Null();
+{{-    else                        }}return Marshal(info.Env(), result);
+{{-    end                         }}
+    }
+{{-  end}}
+
+{{-  range $a := AttributesOf $}}
+    Napi::Value get{{Title $a.Name}}(const Napi::CallbackInfo& info) {
+      return Marshal(info.Env(), impl->get{{Title $a.Name}}(info.Env()));
+    }
+{{-   if not $a.Readonly}}
+    void set{{Title $a.Name}}(const Napi::CallbackInfo& info, const Napi::Value& value) {
+      impl->set{{Title $a.Name}}(info.Env(), Serializer<{{template "Type" $a.Type}}>::Unmarshal(value));
+    }
+{{-   end }}
+{{-  end}}
+  };
+{{end}}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "Interface"}}
+{{$.Name}}::{{$.Name}}() = default;
+
+{{$.Name}}* {{$.Name}}::Unwrap(Napi::Object object) {
+  return Wrappers::W{{$.Name}}::Unwrap(object)->impl.get();
+}
+
+Interface<{{$.Name}}> {{$.Name}}::Bind(Napi::Env env, std::unique_ptr<{{$.Name}}>&& impl) {
+  auto* wrappers = Wrappers::For(env);
+  auto object = wrappers->{{$.Name}}_.ctor.New({});
+  auto* wrapper = Wrappers::W{{$.Name}}::Unwrap(object);
+  wrapper->impl = std::move(impl);
+  return Interface<{{$.Name}}>(object);
+}
+
+{{$.Name}}::~{{$.Name}}() {}
+{{ end}}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "Enum"}}
+{{$.Name}} Serializer<{{$.Name}}>::Unmarshal(Napi::Value value) {
+  std::string str = value.ToString();
+{{-  range $e := $.Values}}
+  if (str == {{$e.Value}}) {
+    return {{$.Name}}::{{EnumEntryName $e.Value}};
+  }
+{{-  end}}
+  return {{$.Name}}::kInvalidEnum;
+}
+Napi::Value Serializer<{{$.Name}}>::Marshal(Napi::Env env, {{$.Name}} value) {
+  switch (value) {
+{{-  range $e := $.Values}}
+  case {{$.Name}}::{{EnumEntryName $e.Value}}:
+    return Napi::String::New(env, {{$e.Value}});
+    break;
+{{-  end}}
+  }
+  return env.Undefined();
+}
+{{ end}}

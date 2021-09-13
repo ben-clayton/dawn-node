@@ -1,0 +1,65 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "tests",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/home/ben/bin/node/bin/node",
+      "args": ["./test/test_binding.js"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "name": "CTS",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/home/ben/bin/node/bin/node",
+      "args": ["./test.js", "webgpu:api,operation,buffers,map:*"],
+      "stopAtEntry": false,
+      "cwd": "/home/ben/src/gpuweb-cts",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+    {
+      "name": "CTS (debug node)",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "/home/ben/src/node/out/Debug/node",
+      "args": ["./test.js", "webgpu:api,operation,buffers,map:*"],
+      "stopAtEntry": false,
+      "cwd": "/home/ben/src/gpuweb-cts",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}

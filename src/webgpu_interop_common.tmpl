@@ -1,0 +1,48 @@
+{{- define "Type" -}}
+{{-        if IsUndefinedType $}}void
+{{-   else if IsTypeName      $}}
+{{-          if eq $.Name "boolean"        }}bool
+{{-     else if eq $.Name "object"         }}Object
+{{-     else if eq $.Name "DOMString"      }}std::string
+{{-     else if eq $.Name "USVString"      }}std::string
+{{-     else if eq $.Name "ArrayBuffer"    }}ArrayBuffer
+{{-     else if IsInterface (Lookup $.Name)}}Interface<{{$.Name}}>
+{{-     else                               }}{{$.Name}}
+{{-     end                                }}
+{{-   else if IsParametrizedType $}}{{$.Name}}<{{template "TypeList" $.Elems}}>
+{{-   else if IsNullableType     $}}std::optional<{{template "Type" $.Type}}>
+{{-   else if IsUnionType        $}}std::variant<{{template "VariantTypeList" $.Types}}>
+{{-   else if IsSequenceType     $}}std::vector<{{template "Type" $.Elem}}>
+{{-   else if IsRecordType       $}}std::unordered_map<{{template "Type" $.Key}}, {{template "Type" $.Elem}}>
+{{-   else                        }} /* Unhandled Type {{printf "%T" $}} */
+{{-   end -}}
+{{- end }}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "Literal" -}}
+{{-        if IsBasicLiteral $}}{{$.Value}}
+{{-   else                    }} /* Unhandled Type {{printf "%T" $}} */
+{{-   end }}
+{{- end }}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "TypeList" -}}
+{{-   range $i, $ty := $}}
+{{-     if $i }}, {{end}}
+{{-     template "Type" $ty}}
+{{-   end}}
+{{- end }}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "VariantTypeList" -}}
+{{-   range $i, $ty := $}}
+{{-     if not (IsUndefinedType $ty)}}
+{{-       if $i }}, {{end}}
+{{-       template "Type" $ty}}
+{{-     end}}
+{{-   end}}
+{{- end }}
+

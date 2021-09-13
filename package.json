@@ -1,0 +1,21 @@
+{
+  "main": "lib/binding.js",
+  "private": "true",
+  "dependencies": {
+    "node-addon-api": "^1.1.0",
+    "webidl-napi": "github:nodejs/webidl-napi"
+  },
+  "scripts": {
+    "install": "cmake-js compile",
+    "test": "node --napi-modules ./test/test_binding.js"
+  },
+  "gypfile": true,
+  "name": "dawn_node",
+  "version": "1.0.0",
+  "devDependencies": {
+    "cmake-js": "^6.2.1"
+  },
+  "author": "",
+  "license": "Apache",
+  "description": ""
+}

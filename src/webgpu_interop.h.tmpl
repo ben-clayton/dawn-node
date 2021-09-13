@@ -1,0 +1,191 @@
+{{- Include "webgpu_interop_common.tmpl" -}}
+
+#ifndef DAWN_NODE_GEN_WEBGPU_INTEROP_H_
+#define DAWN_NODE_GEN_WEBGPU_INTEROP_H_
+
+#include "src/core_interop.h"
+
+namespace wgpu {
+namespace interop {
+
+template<typename T>
+using FrozenArray = std::vector<T>;
+
+using DataView = std::vector<uint8_t>;
+
+using Object = Napi::Object;
+
+Napi::Object InitWebGPUInterfaces(Napi::Env env, Napi::Object exports);
+
+{{  range $ := .Declarations}}
+{{-        if IsDictionary $}}{{template "Dictionary" $}}
+{{-   else if IsInterface  $}}{{template "Interface" $}}
+{{-   else if IsEnum       $}}{{template "Enum" $}}
+{{-   else if IsTypedef    $}}{{template "Typedef" $}}
+{{-   end}}
+{{- end}}
+
+}  // namespace interop
+}  // namespace wgpu
+
+#endif // DAWN_NODE_GEN_WEBGPU_INTEROP_H_
+
+{{- /**********************************************************************/ -}}
+
+{{- define "Dictionary"}}
+// dictionary {{$.Name}}
+class {{$.Name}} {{- if $.Inherits }} : public {{$.Inherits}}{{end}} {
+public:
+{{   range $m := $.Members}}
+{{-    if      IsConstructor $m}}  {{$.Name}}();
+{{     else if IsMember      $m}}  {{template "Member" $m}}
+{{     end}}
+{{-  end -}}
+};
+
+template<>
+class Serializer<{{$.Name}}> {
+public:
+  static {{$.Name}} Unmarshal(Napi::Value);
+  static Napi::Value Marshal(Napi::Env, {{$.Name}});
+};
+{{ end}}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "Interface"}}
+// interface {{$.Name}}
+class {{$.Name}} {{- if $.Inherits }} : public {{$.Inherits}}{{end}} {
+public:
+  static Interface<{{$.Name}}> Bind(Napi::Env, std::unique_ptr<{{$.Name}}>&&);
+  static {{$.Name}}* Unwrap(Napi::Object);
+
+  template<typename T, typename ... ARGS>
+  static inline Interface<{{$.Name}}> Create(Napi::Env env, ARGS&& ... args) {
+    return Bind(env, std::make_unique<T>(std::forward<ARGS>(args)...));
+  }
+
+  virtual ~{{$.Name}}();
+  {{$.Name}}();
+{{-  range $m := MethodsOf $}}
+{{-    template "InterfaceMember" $m}}
+{{-  end}}
+{{-  range $a := AttributesOf $}}
+{{-    template "InterfaceAttribute" $a}}
+{{-  end}}
+{{-  range $c := ConstantsOf  $}}
+{{-    template "InterfaceConstant" $c}}
+{{-  end}}
+};
+{{ end}}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "Typedef"}}
+using {{$.Name}} = {{template "Type" $.Type}};
+{{ end}}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "Enum"}}
+enum class {{$.Name}} {
+{{-  range $ := $.Values}}
+  {{EnumEntryName $.Value}},
+{{-  end}}
+  kInvalidEnum = -1,
+};
+
+template<>
+class Serializer<{{$.Name}}> {
+public:
+  static {{$.Name}} Unmarshal(Napi::Value);
+  static Napi::Value Marshal(Napi::Env, {{$.Name}});
+};
+{{ end}}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "Member"}}
+{{-   if $.Attribute}}{{template "Type" $.Type}} {{$.Name}};
+{{-   else          }}{{template "Type" $.Type}} {{$.Name}}({{template "Parameters" $.Parameters}});
+{{-   end }}
+{{- end }}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "InterfaceMember"}}
+  virtual {{template "Type" $.Type}} {{$.Name}}(Napi::Env{{template "ParametersWithComma" $.Parameters}}) = 0;
+{{- end }}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "InterfaceAttribute"}}
+  virtual {{template "Type" $.Type}} get{{Title $.Name}}(Napi::Env) = 0;
+{{-   if not $.Readonly}}
+  virtual void set{{Title $.Name}}(Napi::Env, {{template "Type" $.Type}} value) = 0;
+{{-   end }}
+{{- end }}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "InterfaceConstant"}}
+  static constexpr {{template "Type" $.Type}} {{$.Name}} = {{template "Literal" $.Init}};
+{{- end }}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "Parameters"}}
+{{-   range $i, $param := $ }}
+{{-     if $i }}, {{end}}
+{{-     template "Parameter" $param}}
+{{-   end }}
+{{- end }}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "ParametersWithComma"}}
+{{-   range $i, $param := $ }}, {{/*  */}}
+{{-     template "Parameter" $param}}
+{{-   end }}
+{{- end }}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "Parameter" -}}
+{{-   if $.Optional -}}
+std::optional<{{template "Type" $.Type}}> {{$.Name}}
+{{-   else}}
+{{-     template "Type" $.Type}} {{$.Name}}
+{{-   end}}
+{{- end}}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "Type" -}}
+{{-   if      IsTypeName         $}}
+{{-          if eq $.Name "undefined"      }}void
+{{-     else if eq $.Name "boolean"        }}bool
+{{-     else if eq $.Name "object"         }}Object
+{{-     else if eq $.Name "DOMString"      }}std::string
+{{-     else if eq $.Name "USVString"      }}std::string
+{{-     else if IsInterface (Lookup $.Name)}}Interface<{{$.Name}}>
+{{-     else                               }}{{$.Name}}
+{{-     end                                }}
+{{-   else if IsParametrizedType $}}{{$.Name}}<{{template "TypeList" $.Elems}}>
+{{-   else if IsNullableType     $}}std::optional<{{template "Type" $.Type}}>
+{{-   else if IsUnionType        $}}std::variant<{{template "TypeList" $.Types}}>
+{{-   else if IsSequenceType     $}}std::vector<{{template "Type" $.Elem}}>
+{{-   else if IsRecordType       $}}std::unordered_map<{{template "Type" $.Key}}, {{template "Type" $.Elem}}>
+{{-   else                        }} /* Unhandled Type {{printf "%T" $}} */
+{{-   end -}}
+{{- end }}
+
+{{- /**********************************************************************/ -}}
+
+{{- define "TypeList" -}}
+{{-   range $i, $ty := $}}
+{{-     if $i }}, {{end}}
+{{-     template "Type" $ty}}
+{{-   end}}
+{{- end }}
+

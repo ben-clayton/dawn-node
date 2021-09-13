@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}",
+                "${workspaceFolder}/build/gen",
+                "${workspaceFolder}/node_modules/node-addon-api",
+                "${workspaceFolder}/node_modules/node-addon-api/external-napi",
+                "${workspaceFolder}/third_party/dawn/src/include",
+                "${workspaceFolder}/build/dawn/gen/src/include"
+            ],
+            "defines": ["NAPI_VERSION=10"],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu17"
+        }
+    ],
+    "version": 4
+}
