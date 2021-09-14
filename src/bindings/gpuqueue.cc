@@ -61,8 +61,9 @@ void GPUQueue::writeBuffer(Napi::Env env,
                            std::optional<interop::GPUSize64> dataOffset,
                            std::optional<interop::GPUSize64> size) {
   wgpu::Buffer buf = *buffer.As<GPUBuffer>();
-  BufferSource src{};
-  if (!Convert(env, src, data)) {
+  Converter::BufferSource src{};
+  Converter conv(env);
+  if (!conv(src, data)) {
     return;
   }
 
@@ -84,13 +85,14 @@ void GPUQueue::writeTexture(Napi::Env env,
                             interop::GPUImageDataLayout dataLayout,
                             interop::GPUExtent3D size) {
   wgpu::ImageCopyTexture dst{};
-  BufferSource src{};
+  Converter::BufferSource src{};
   wgpu::TextureDataLayout layout{};
   wgpu::Extent3D sz{};
-  if (!Convert(env, dst, destination) ||    //
-      !Convert(env, src, data) ||           //
-      !Convert(env, layout, dataLayout) ||  //
-      !Convert(env, sz, size)) {
+  Converter conv(env);
+  if (!conv(dst, destination) ||    //
+      !conv(src, data) ||           //
+      !conv(layout, dataLayout) ||  //
+      !conv(sz, size)) {
     return;
   }
 

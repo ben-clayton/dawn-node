@@ -3,10 +3,14 @@
 #include <cassert>
 
 #include "src/bindings/convert.h"
+#include "src/bindings/gpubindgrouplayout.h"
 #include "src/bindings/gpubuffer.h"
 #include "src/bindings/gpucommandbuffer.h"
 #include "src/bindings/gpucommandencoder.h"
+#include "src/bindings/gpucomputepipeline.h"
+#include "src/bindings/gpupipelinelayout.h"
 #include "src/bindings/gpuqueue.h"
+#include "src/bindings/gpurenderpipeline.h"
 #include "src/bindings/gpushadermodule.h"
 #include "src/bindings/gputexture.h"
 #include "src/utils/debug.h"
@@ -120,12 +124,11 @@ void GPUDevice::destroy(Napi::Env) { device_.Release(); }
 interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(
     Napi::Env env, interop::GPUBufferDescriptor descriptor) {
   wgpu::BufferDescriptor desc{};
-  if (descriptor.label.has_value()) {
-    desc.label = descriptor.label.value().c_str();
-  }
-  desc.mappedAtCreation = descriptor.mappedAtCreation.value_or(false);
-  desc.size = descriptor.size;
-  if (!Convert(env, desc.usage, descriptor.usage)) {
+  Converter conv(env);
+  if (!conv(desc.label, descriptor.label) ||
+      !conv(desc.mappedAtCreation, descriptor.mappedAtCreation) ||
+      !conv(desc.size, descriptor.size) ||
+      !conv(desc.usage, descriptor.usage)) {
     return {};
   }
   //  LOG("label: ", desc.label, ", mappedAtCreation: ", desc.mappedAtCreation,
@@ -137,21 +140,16 @@ interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(
 interop::Interface<interop::GPUTexture> GPUDevice::createTexture(
     Napi::Env env, interop::GPUTextureDescriptor descriptor) {
   wgpu::TextureDescriptor desc{};
-  if (descriptor.label.has_value()) {
-    desc.label = descriptor.label.value().c_str();
-  }
-  if (descriptor.dimension.has_value()) {
-    if (!Convert(env, desc.dimension, descriptor.dimension.value())) {
-      return {};
-    }
-  }
-  if (!Convert(env, desc.usage, descriptor.usage) ||  //
-      !Convert(env, desc.size, descriptor.size) ||    //
-      !Convert(env, desc.format, descriptor.format)) {
+  Converter conv(env);
+  if (!conv(desc.label, descriptor.label) ||
+      !conv(desc.usage, descriptor.usage) ||                  //
+      !conv(desc.size, descriptor.size) ||                    //
+      !conv(desc.dimension, descriptor.dimension) ||          //
+      !conv(desc.mipLevelCount, descriptor.mipLevelCount) ||  //
+      !conv(desc.sampleCount, descriptor.sampleCount) ||      //
+      !conv(desc.format, descriptor.format)) {
     return {};
   }
-  desc.mipLevelCount = descriptor.mipLevelCount.value_or(1);
-  desc.sampleCount = descriptor.sampleCount.value_or(1);
   return interop::GPUTexture::Create<GPUTexture>(env,
                                                  device_.CreateTexture(&desc));
 }
@@ -174,8 +172,21 @@ GPUDevice::createBindGroupLayout(
 }
 
 interop::Interface<interop::GPUPipelineLayout> GPUDevice::createPipelineLayout(
-    Napi::Env, interop::GPUPipelineLayoutDescriptor descriptor) {
-  UNIMPLEMENTED();
+    Napi::Env env, interop::GPUPipelineLayoutDescriptor descriptor) {
+  wgpu::PipelineLayoutDescriptor desc{};
+  Converter conv(env);
+  if (!conv(desc.label, descriptor.label)) {
+    return {};
+  }
+  std::vector<wgpu::BindGroupLayout> layouts(
+      descriptor.bindGroupLayouts.size());
+  for (size_t i = 0; i < layouts.size(); i++) {
+    layouts[i] = *descriptor.bindGroupLayouts[i].As<GPUBindGroupLayout>();
+  }
+  desc.bindGroupLayouts = layouts.data();
+  desc.bindGroupLayoutCount = layouts.size();
+  return interop::GPUPipelineLayout::Create<GPUPipelineLayout>(
+      env, device_.CreatePipelineLayout(&desc));
 }
 
 interop::Interface<interop::GPUBindGroup> GPUDevice::createBindGroup(
@@ -185,23 +196,72 @@ interop::Interface<interop::GPUBindGroup> GPUDevice::createBindGroup(
 
 interop::Interface<interop::GPUShaderModule> GPUDevice::createShaderModule(
     Napi::Env env, interop::GPUShaderModuleDescriptor descriptor) {
-  wgpu::ShaderModuleDescriptor desc{};
-  if (descriptor.label.has_value()) {
-    desc.label = descriptor.label.value().c_str();
+  Converter conv(env);
+
+  wgpu::ShaderModuleWGSLDescriptor wgsl_desc{};
+  if (!conv(wgsl_desc.source, descriptor.code)) {
+    return {};
   }
+
+  wgpu::ShaderModuleDescriptor sm_desc{};
+  if (!conv(sm_desc.label, descriptor.label)) {
+    return {};
+  }
+  sm_desc.nextInChain = &wgsl_desc;
+
   return interop::GPUShaderModule::Create<GPUShaderModule>(
-      env, device_.CreateShaderModule(&desc), this);
+      env, device_.CreateShaderModule(&sm_desc), this);
 }
 
 interop::Interface<interop::GPUComputePipeline>
 GPUDevice::createComputePipeline(
-    Napi::Env, interop::GPUComputePipelineDescriptor descriptor) {
-  UNIMPLEMENTED();
+    Napi::Env env, interop::GPUComputePipelineDescriptor descriptor) {
+  wgpu::ComputePipelineDescriptor desc{};
+  if (!descriptor.layout.has_value()) {
+    Napi::Error::New(env, "missing GPUComputePipelineDescriptor.layout")
+        .ThrowAsJavaScriptException();
+    return {};
+  }
+  desc.layout = *descriptor.layout.value().As<GPUPipelineLayout>();
+  Converter conv(env);
+  if (!conv(desc.label, descriptor.label) ||
+      !conv(desc.computeStage, descriptor.compute)) {
+    return {};
+  }
+  return interop::GPUComputePipeline::Create<GPUComputePipeline>(
+      env, device_.CreateComputePipeline(&desc));
 }
 
 interop::Interface<interop::GPURenderPipeline> GPUDevice::createRenderPipeline(
-    Napi::Env, interop::GPURenderPipelineDescriptor descriptor) {
-  UNIMPLEMENTED();
+    Napi::Env env, interop::GPURenderPipelineDescriptor descriptor) {
+  wgpu::RenderPipelineDescriptor desc{};
+  Converter conv(env);
+
+  wgpu::DepthStencilState depthStencil{};
+  if (descriptor.depthStencil.has_value()) {
+    if (!conv(depthStencil, descriptor.depthStencil)) {
+      return {};
+    }
+    desc.depthStencil = &depthStencil;
+  }
+
+  wgpu::FragmentState fragment{};
+  if (descriptor.fragment.has_value()) {
+    if (!conv(fragment, descriptor.fragment)) {
+      return {};
+    }
+    desc.fragment = &fragment;
+  }
+
+  if (!conv(desc.label, descriptor.label) ||          //
+      !conv(desc.layout, descriptor.layout) ||        //
+      !conv(desc.vertex, descriptor.vertex) ||        //
+      !conv(desc.primitive, descriptor.primitive) ||  //
+      !conv(desc.multisample, descriptor.multisample)) {
+    return {};
+  }
+  return interop::GPURenderPipeline::Create<GPURenderPipeline>(
+      env, device_.CreateRenderPipeline(&desc));
 }
 
 interop::Promise<interop::Interface<interop::GPUComputePipeline>>

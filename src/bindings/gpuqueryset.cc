@@ -1,18 +1,14 @@
-#include "src/bindings/gpucomputepipeline.h"
+#include "src/bindings/gpuqueryset.h"
 
-#include <cassert>
-
-#include "src/bindings/gpubuffer.h"
 #include "src/utils/debug.h"
 
 namespace wgpu {
 namespace bindings {
 
 ////////////////////////////////////////////////////////////////////////////////
-// wgpu::bindings::GPUComputePipeline
+// wgpu::bindings::GPUQuerySet
 ////////////////////////////////////////////////////////////////////////////////
-GPUComputePipeline::GPUComputePipeline(wgpu::ComputePipeline pipeline)
-    : pipeline_(pipeline) {}
+GPUQuerySet::GPUQuerySet(wgpu::QuerySet query_set) : query_set_(query_set) {}
 
 }  // namespace bindings
 }  // namespace wgpu

@@ -19,7 +19,8 @@ interop::Promise<void> GPUBuffer::mapAsync(
     std::optional<interop::GPUSize64> offset,
     std::optional<interop::GPUSize64> size) {
   wgpu::MapMode md{};
-  if (!Convert(env, md, mode)) {
+  Converter conv(env);
+  if (!conv(md, mode)) {
     return {env};
   }
 

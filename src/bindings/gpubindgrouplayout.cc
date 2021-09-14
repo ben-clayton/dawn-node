@@ -1,18 +1,16 @@
-#include "src/bindings/gpucomputepipeline.h"
+#include "src/bindings/gpubindgrouplayout.h"
 
-#include <cassert>
-
-#include "src/bindings/gpubuffer.h"
+#include "src/bindings/gpudevice.h"
 #include "src/utils/debug.h"
 
 namespace wgpu {
 namespace bindings {
 
 ////////////////////////////////////////////////////////////////////////////////
-// wgpu::bindings::GPUComputePipeline
+// wgpu::bindings::GPUBindGroupLayout
 ////////////////////////////////////////////////////////////////////////////////
-GPUComputePipeline::GPUComputePipeline(wgpu::ComputePipeline pipeline)
-    : pipeline_(pipeline) {}
+GPUBindGroupLayout::GPUBindGroupLayout(wgpu::BindGroupLayout layout)
+    : layout_(layout) {}
 
 }  // namespace bindings
 }  // namespace wgpu

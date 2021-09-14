@@ -1,4 +1,4 @@
-#include "src/bindings/gpucomputepipeline.h"
+#include "src/bindings/gpurenderpipeline.h"
 
 #include <cassert>
 
@@ -9,9 +9,9 @@ namespace wgpu {
 namespace bindings {
 
 ////////////////////////////////////////////////////////////////////////////////
-// wgpu::bindings::GPUComputePipeline
+// wgpu::bindings::GPURenderPipeline
 ////////////////////////////////////////////////////////////////////////////////
-GPUComputePipeline::GPUComputePipeline(wgpu::ComputePipeline pipeline)
+GPURenderPipeline::GPURenderPipeline(wgpu::RenderPipeline pipeline)
     : pipeline_(pipeline) {}
 
 }  // namespace bindings

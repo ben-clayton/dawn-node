@@ -15,6 +15,8 @@ class GPUShaderModule : public interop::GPUShaderModule {
  public:
   GPUShaderModule(wgpu::ShaderModule shader, GPUDevice* device);
 
+  operator wgpu::ShaderModule &() { return shader_; }
+
   interop::Promise<interop::Interface<interop::GPUCompilationInfo>>
       compilationInfo(Napi::Env) override;
 

@@ -7,6 +7,8 @@
 #include "src/bindings/gpubuffer.h"
 #include "src/bindings/gpucommandbuffer.h"
 #include "src/bindings/gpucomputepassencoder.h"
+#include "src/bindings/gpuqueryset.h"
+#include "src/bindings/gpurenderpassencoder.h"
 #include "src/bindings/gputexture.h"
 #include "src/utils/debug.h"
 
@@ -21,8 +23,34 @@ GPUCommandEncoder::GPUCommandEncoder(wgpu::CommandEncoder cmd_enc)
 
 interop::Interface<interop::GPURenderPassEncoder>
 GPUCommandEncoder::beginRenderPass(
-    Napi::Env, interop::GPURenderPassDescriptor descriptor) {
-  UNIMPLEMENTED();
+    Napi::Env env, interop::GPURenderPassDescriptor descriptor) {
+  wgpu::RenderPassDescriptor desc{};
+  Converter conv(env);
+
+  std::vector<wgpu::RenderPassColorAttachment> colorAttachments(
+      descriptor.colorAttachments.size());
+  for (size_t i = 0; i < colorAttachments.size(); i++) {
+    if (!conv(colorAttachments[i], descriptor.colorAttachments[i])) {
+      return {};
+    }
+  }
+  desc.colorAttachments = colorAttachments.data();
+  desc.colorAttachmentCount = colorAttachments.size();
+
+  wgpu::RenderPassDepthStencilAttachment depthStencilAttachment{};
+  if (descriptor.depthStencilAttachment.has_value()) {
+    if (!conv(depthStencilAttachment, descriptor.depthStencilAttachment)) {
+      return {};
+    }
+    desc.depthStencilAttachment = &depthStencilAttachment;
+  }
+
+  if (!conv(desc.label, descriptor.label) ||
+      !conv(desc.occlusionQuerySet, descriptor.occlusionQuerySet)) {
+    return {};
+  }
+  return interop::GPURenderPassEncoder::Create<GPURenderPassEncoder>(
+      env, cmd_enc_.BeginRenderPass(&desc));
 }
 
 interop::Interface<interop::GPUComputePassEncoder>
@@ -35,14 +63,18 @@ GPUCommandEncoder::beginComputePass(
 }
 
 void GPUCommandEncoder::copyBufferToBuffer(
-    Napi::Env, interop::Interface<interop::GPUBuffer> source,
+    Napi::Env env, interop::Interface<interop::GPUBuffer> source,
     interop::GPUSize64 sourceOffset,
     interop::Interface<interop::GPUBuffer> destination,
     interop::GPUSize64 destinationOffset, interop::GPUSize64 size) {
-  auto* src = source.As<GPUBuffer>();
-  auto* dst = destination.As<GPUBuffer>();
-  cmd_enc_.CopyBufferToBuffer(*src, sourceOffset, *dst, destinationOffset,
-                              size);
+  wgpu::Buffer src{};
+  wgpu::Buffer dst{};
+  Converter conv(env);
+  if (!conv(src, source) ||  //
+      !conv(dst, destination)) {
+    return;
+  }
+  cmd_enc_.CopyBufferToBuffer(src, sourceOffset, dst, destinationOffset, size);
 }
 
 void GPUCommandEncoder::copyBufferToTexture(
@@ -51,9 +83,10 @@ void GPUCommandEncoder::copyBufferToTexture(
   wgpu::ImageCopyBuffer src{};
   wgpu::ImageCopyTexture dst{};
   wgpu::Extent3D size{};
-  if (!Convert(env, src, source) ||       //
-      !Convert(env, dst, destination) ||  //
-      !Convert(env, size, copySize)) {
+  Converter conv(env);
+  if (!conv(src, source) ||       //
+      !conv(dst, destination) ||  //
+      !conv(size, copySize)) {
     return;
   }
   cmd_enc_.CopyBufferToTexture(&src, &dst, &size);
@@ -65,9 +98,10 @@ void GPUCommandEncoder::copyTextureToBuffer(
   wgpu::ImageCopyTexture src{};
   wgpu::ImageCopyBuffer dst{};
   wgpu::Extent3D size{};
-  if (!Convert(env, src, source) ||       //
-      !Convert(env, dst, destination) ||  //
-      !Convert(env, size, copySize)) {
+  Converter conv(env);
+  if (!conv(src, source) ||       //
+      !conv(dst, destination) ||  //
+      !conv(size, copySize)) {
     return;
   }
   cmd_enc_.CopyTextureToBuffer(&src, &dst, &size);

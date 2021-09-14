@@ -38,7 +38,7 @@ Napi::Object InitWebGPUInterfaces(Napi::Env env, Napi::Object exports) {
 {{- /**********************************************************************/ -}}
 
 {{- define "Dictionary"}}
-{{$.Name}} Serializer<{{$.Name}}>::Unmarshal(Napi::Value value) {
+{{$.Name}} Serializer<{{$.Name}}>::Unmarshal(Napi::Env env, Napi::Value value) {
   auto object = value.ToObject();
   return {{$.Name}}{
 {{- template "UnmarshalDictionaryMembers" $}}
@@ -57,7 +57,10 @@ Napi::Value Serializer<{{$.Name}}>::Marshal(Napi::Env env, {{$.Name}} value) {
 {{- define "UnmarshalDictionaryMembers"}}
 {{-    if $.Inherits}}{{template "UnmarshalDictionaryMembers" (Lookup $.Inherits)}}{{end}}
 {{-    range $m := $.Members}}
-    interop::Unmarshal<{{template "AttributeType" $m}}>(object.Get("{{$m.Name}}")),
+    {{/* newline */}}
+{{-      if   $m.Init }}interop::Unmarshal<std::optional<{{template "AttributeType" $m}}>>(env, object.Get("{{$m.Name}}")).value_or({{Eval "Literal" "Type" $m.Type "Value" $m.Init}}),
+{{-      else         }}interop::Unmarshal<{{template "AttributeType" $m}}>(env, object.Get("{{$m.Name}}")),
+{{-      end          }}
 {{-    end}}
 {{- end}}
 
@@ -150,7 +153,7 @@ Wrappers* Wrappers::instance = nullptr;
 {{-      range $i, $p := $m.Parameters}},
         {{/* indent */}}
 {{-        if $p.Optional}}info[{{$i}}].IsUndefined() ? std::optional<{{template "Type" $p.Type}}>{} : {{end -}}
-        Serializer<{{template "Type" $p.Type}}>::Unmarshal(info[{{$i}}])
+        Serializer<{{template "Type" $p.Type}}>::Unmarshal(info.Env(), info[{{$i}}])
 {{-      end -}}
         );
       {{/* indent */ -}}
@@ -166,7 +169,7 @@ Wrappers* Wrappers::instance = nullptr;
     }
 {{-   if not $a.Readonly}}
     void set{{Title $a.Name}}(const Napi::CallbackInfo& info, const Napi::Value& value) {
-      impl->set{{Title $a.Name}}(info.Env(), Serializer<{{template "Type" $a.Type}}>::Unmarshal(value));
+      impl->set{{Title $a.Name}}(info.Env(), Serializer<{{template "Type" $a.Type}}>::Unmarshal(info.Env(), value));
     }
 {{-   end }}
 {{-  end}}
@@ -196,14 +199,14 @@ Interface<{{$.Name}}> {{$.Name}}::Bind(Napi::Env env, std::unique_ptr<{{$.Name}}
 {{- /**********************************************************************/ -}}
 
 {{- define "Enum"}}
-{{$.Name}} Serializer<{{$.Name}}>::Unmarshal(Napi::Value value) {
+{{$.Name}} Serializer<{{$.Name}}>::Unmarshal(Napi::Env env, Napi::Value value) {
   std::string str = value.ToString();
 {{-  range $e := $.Values}}
   if (str == {{$e.Value}}) {
     return {{$.Name}}::{{EnumEntryName $e.Value}};
   }
 {{-  end}}
-  return {{$.Name}}::kInvalidEnum;
+  throw Napi::Error::New(env);
 }
 Napi::Value Serializer<{{$.Name}}>::Marshal(Napi::Env env, {{$.Name}} value) {
   switch (value) {

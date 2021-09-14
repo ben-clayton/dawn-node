@@ -84,7 +84,7 @@ class Serializer {};
 template <>
 class Serializer<Napi::Object> {
  public:
-  static inline Napi::Object Unmarshal(Napi::Value value) {
+  static inline Napi::Object Unmarshal(Napi::Env, Napi::Value value) {
     return value.ToObject();
   }
   static inline Napi::Value Marshal(Napi::Env, Napi::Object value) {
@@ -95,7 +95,7 @@ class Serializer<Napi::Object> {
 template <>
 class Serializer<ArrayBuffer> {
  public:
-  static inline ArrayBuffer Unmarshal(Napi::Value value) {
+  static inline ArrayBuffer Unmarshal(Napi::Env, Napi::Value value) {
     return value.As<ArrayBuffer>();
   };
   static inline Napi::Value Marshal(Napi::Env, ArrayBuffer value) {
@@ -106,7 +106,7 @@ class Serializer<ArrayBuffer> {
 template <>
 class Serializer<Napi::TypedArray> {
  public:
-  static inline Napi::TypedArray Unmarshal(Napi::Value value) {
+  static inline Napi::TypedArray Unmarshal(Napi::Env, Napi::Value value) {
     return value.As<Napi::TypedArray>();
   };
   static inline Napi::Value Marshal(Napi::Env, ArrayBuffer value) {
@@ -117,7 +117,7 @@ class Serializer<Napi::TypedArray> {
 template <typename T>
 class Serializer<Napi::TypedArrayOf<T>> {
  public:
-  static inline Napi::TypedArrayOf<T> Unmarshal(Napi::Value value) {
+  static inline Napi::TypedArrayOf<T> Unmarshal(Napi::Env, Napi::Value value) {
     return value.As<Napi::TypedArrayOf<T>>();
   };
   static inline Napi::Value Marshal(Napi::Env, ArrayBuffer value) {
@@ -128,105 +128,105 @@ class Serializer<Napi::TypedArrayOf<T>> {
 template <>
 class Serializer<bool> {
  public:
-  static bool Unmarshal(Napi::Value);
+  static bool Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, bool);
 };
 
 template <>
 class Serializer<std::string> {
  public:
-  static std::string Unmarshal(Napi::Value);
+  static std::string Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, std::string);
 };
 
 template <>
 class Serializer<int8_t> {
  public:
-  static int8_t Unmarshal(Napi::Value);
+  static int8_t Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, int8_t);
 };
 
 template <>
 class Serializer<uint8_t> {
  public:
-  static uint8_t Unmarshal(Napi::Value);
+  static uint8_t Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, uint8_t);
 };
 
 template <>
 class Serializer<int16_t> {
  public:
-  static int16_t Unmarshal(Napi::Value);
+  static int16_t Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, int16_t);
 };
 
 template <>
 class Serializer<uint16_t> {
  public:
-  static uint16_t Unmarshal(Napi::Value);
+  static uint16_t Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, uint16_t);
 };
 
 template <>
 class Serializer<int32_t> {
  public:
-  static int32_t Unmarshal(Napi::Value);
+  static int32_t Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, int32_t);
 };
 
 template <>
 class Serializer<uint32_t> {
  public:
-  static uint32_t Unmarshal(Napi::Value);
+  static uint32_t Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, uint32_t);
 };
 
 template <>
 class Serializer<int64_t> {
  public:
-  static int64_t Unmarshal(Napi::Value);
+  static int64_t Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, int64_t);
 };
 
 template <>
 class Serializer<uint64_t> {
  public:
-  static uint64_t Unmarshal(Napi::Value);
+  static uint64_t Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, uint64_t);
 };
 
 template <>
 class Serializer<long long> {
  public:
-  static long long Unmarshal(Napi::Value);
+  static long long Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, long long);
 };
 
 template <>
 class Serializer<unsigned long long> {
  public:
-  static unsigned long long Unmarshal(Napi::Value);
+  static unsigned long long Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, unsigned long long);
 };
 
 template <>
 class Serializer<float> {
  public:
-  static float Unmarshal(Napi::Value);
+  static float Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, float);
 };
 
 template <>
 class Serializer<double> {
  public:
-  static double Unmarshal(Napi::Value);
+  static double Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, double);
 };
 
 template <typename T>
 class Serializer<Interface<T>> {
  public:
-  static Interface<T> Unmarshal(Napi::Value value) {
+  static Interface<T> Unmarshal(Napi::Env, Napi::Value value) {
     return {value.ToObject()};
   }
   static Napi::Value Marshal(Napi::Env env, const Interface<T>& value) {
@@ -237,11 +237,11 @@ class Serializer<Interface<T>> {
 template <typename T>
 class Serializer<std::optional<T>> {
  public:
-  static std::optional<T> Unmarshal(Napi::Value value) {
+  static std::optional<T> Unmarshal(Napi::Env env, Napi::Value value) {
     if (value.IsNull() || value.IsUndefined()) {
       return {};
     }
-    return Serializer<T>::Unmarshal(value);
+    return Serializer<T>::Unmarshal(env, value);
   }
   static Napi::Value Marshal(Napi::Env env, std::optional<T> value) {
     if (value.has_value()) {
@@ -254,11 +254,11 @@ class Serializer<std::optional<T>> {
 template <typename T>
 class Serializer<std::vector<T>> {
  public:
-  static inline std::vector<T> Unmarshal(Napi::Value value) {
+  static inline std::vector<T> Unmarshal(Napi::Env env, Napi::Value value) {
     auto arr = value.As<Napi::Array>();
     std::vector<T> vec(arr.Length());
     for (size_t i = 0; i < vec.size(); i++) {
-      vec[i] = Serializer<T>::Unmarshal(arr[i]);
+      vec[i] = Serializer<T>::Unmarshal(env, arr[i]);
     }
     return vec;
   }
@@ -274,13 +274,14 @@ class Serializer<std::vector<T>> {
 template <typename K, typename V>
 class Serializer<std::unordered_map<K, V>> {
  public:
-  static inline std::unordered_map<K, V> Unmarshal(Napi::Value value) {
+  static inline std::unordered_map<K, V> Unmarshal(Napi::Env env,
+                                                   Napi::Value value) {
     auto obj = value.ToObject();
     auto keys = obj.GetPropertyNames();
     std::unordered_map<K, V> map(keys.Length());
     for (size_t i = 0; i < map.size(); i++) {
-      auto key = Serializer<K>::Unmarshal(keys[i]);
-      auto value = Serializer<V>::Unmarshal(obj.Get(keys[i]));
+      auto key = Serializer<K>::Unmarshal(env, keys[i]);
+      auto value = Serializer<V>::Unmarshal(env, obj.Get(keys[i]));
       map[key] = value;
     }
     return map;
@@ -299,22 +300,25 @@ class Serializer<std::unordered_map<K, V>> {
 template <typename... TYPES>
 class Serializer<std::variant<TYPES...>> {
   template <typename TY>
-  static inline std::variant<TYPES...> TryUnmarshal(Napi::Value value) {
-    return {Serializer<TY>::Unmarshal(value)};
+  static inline std::variant<TYPES...> TryUnmarshal(Napi::Env env,
+                                                    Napi::Value value) {
+    return {Serializer<TY>::Unmarshal(env, value)};
   }
 
   template <typename T0, typename T1, typename... TN>
-  static inline std::variant<TYPES...> TryUnmarshal(Napi::Value value) {
+  static inline std::variant<TYPES...> TryUnmarshal(Napi::Env env,
+                                                    Napi::Value value) {
     try {
-      return TryUnmarshal<T0>(value);
+      return TryUnmarshal<T0>(env, value);
     } catch (Napi::Error) {
-      return TryUnmarshal<T1, TN...>(value);
+      return TryUnmarshal<T1, TN...>(env, value);
     }
   }
 
  public:
-  static inline std::variant<TYPES...> Unmarshal(Napi::Value value) {
-    return TryUnmarshal<TYPES...>(value);
+  static inline std::variant<TYPES...> Unmarshal(Napi::Env env,
+                                                 Napi::Value value) {
+    return TryUnmarshal<TYPES...>(env, value);
   }
   static inline Napi::Value Marshal(Napi::Env env,
                                     std::variant<TYPES...> value) {
@@ -330,15 +334,15 @@ class Serializer<std::variant<TYPES...>> {
 template <typename T>
 class Serializer<Promise<T>> {
  public:
-  static inline Promise<T> Unmarshal(Napi::Value) { return {}; }
+  static inline Promise<T> Unmarshal(Napi::Env, Napi::Value) { return {}; }
   static inline Napi::Value Marshal(Napi::Env, Promise<T> promise) {
     return promise.Value();
   }
 };
 
 template <typename T>
-inline T Unmarshal(Napi::Value value) {
-  return Serializer<T>::Unmarshal(value);
+inline T Unmarshal(Napi::Env env, Napi::Value value) {
+  return Serializer<T>::Unmarshal(env, value);
 }
 
 template <typename T>

@@ -21,17 +21,25 @@
 {{- /**********************************************************************/ -}}
 
 {{- define "AttributeType" -}}
-{{-   if   $.Required}}{{template "Type" $.Type}}
-{{-   else           }}std::optional<{{template "Type" $.Type}}>
+{{-   if      $.Required }}{{template "Type" $.Type}}
+{{-   else if $.Init     }}{{template "Type" $.Type}}
+{{-   else               }}std::optional<{{template "Type" $.Type}}>
 {{-   end}}
 {{- end }}
 
 {{- /**********************************************************************/ -}}
 
 {{- define "Literal" -}}
-{{-        if IsBasicLiteral $}}{{$.Value}}
-{{-   else                    }} /* Unhandled Type {{printf "%T" $}} */
-{{-   end }}
+{{-   if IsTypeName $.Type}}
+{{-     $ty := Lookup $.Type.Name}}
+{{-     if      IsEnum         $ty     }}{{$.Type.Name}}::{{EnumEntryName $.Value.Value}}
+{{-     else if IsBasicLiteral $.Value }}{{$.Value.Value}}
+{{-     else                           }}/* Unhandled Type {{printf "ty: %v $.Type.Name: %T $.Value: %T" $ty $.Type.Name $.Value}} */
+{{-     end                            }}
+{{-   else if IsSequenceType $.Type  }}{{template "Type" $.Type}}{} {{- /* TODO: Assumes the initialiser is empty */}}
+{{-   else if IsBasicLiteral $.Value }}{{$.Value.Value}}
+{{-   else }} /* Unhandled Type {{printf "%T %T" $.Type $.Value}} */
+{{-   end}}
 {{- end }}
 
 {{- /**********************************************************************/ -}}

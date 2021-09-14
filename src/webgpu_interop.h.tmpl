@@ -44,7 +44,7 @@ public:
 template<>
 class Serializer<{{$.Name}}> {
 public:
-  static {{$.Name}} Unmarshal(Napi::Value);
+  static {{$.Name}} Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, {{$.Name}});
 };
 {{ end}}
@@ -96,7 +96,7 @@ enum class {{$.Name}} {
 template<>
 class Serializer<{{$.Name}}> {
 public:
-  static {{$.Name}} Unmarshal(Napi::Value);
+  static {{$.Name}} Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, {{$.Name}});
 };
 {{ end}}
@@ -104,7 +104,8 @@ public:
 {{- /**********************************************************************/ -}}
 
 {{- define "DictionaryMember"}}
-{{-   if $.Attribute}}{{template "AttributeType" $}} {{$.Name}};
+{{-   if $.Attribute}}{{template "AttributeType" $}} {{$.Name}}
+{{-     if $.Init}} = {{Eval "Literal" "Value" $.Init "Type" $.Type}}{{end}};
 {{-   else          }}{{template "Type" $.Type}} {{$.Name}}({{template "Parameters" $.Parameters}});
 {{-   end }}
 {{- end }}
@@ -127,7 +128,7 @@ public:
 {{- /**********************************************************************/ -}}
 
 {{- define "InterfaceConstant"}}
-  static constexpr {{template "Type" $.Type}} {{$.Name}} = {{template "Literal" $.Init}};
+  static constexpr {{template "Type" $.Type}} {{$.Name}} = {{Eval "Literal" "Value" $.Init "Type" $.Type}};
 {{- end }}
 
 {{- /**********************************************************************/ -}}

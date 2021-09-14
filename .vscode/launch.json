@@ -28,7 +28,11 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "/home/ben/bin/node/bin/node",
-      "args": ["./test.js", "webgpu:api,operation,buffers,map:*"],
+      "args": [
+        "./test.js",
+        "--verbose",
+        "webgpu:api,operation,vertex_state,index_format:primitive_restart:*"
+      ],
       "stopAtEntry": false,
       "cwd": "/home/ben/src/gpuweb-cts",
       "environment": [],
