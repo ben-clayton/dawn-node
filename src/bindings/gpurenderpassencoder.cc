@@ -2,7 +2,9 @@
 
 #include <cassert>
 
+#include "src/bindings/convert.h"
 #include "src/bindings/gpubuffer.h"
+#include "src/bindings/gpurenderpipeline.h"
 #include "src/utils/debug.h"
 
 namespace wgpu {
@@ -65,7 +67,7 @@ void GPURenderPassEncoder::executeBundles(
   UNIMPLEMENTED();
 }
 
-void GPURenderPassEncoder::endPass(Napi::Env) { UNIMPLEMENTED(); }
+void GPURenderPassEncoder::endPass(Napi::Env) { enc_.EndPass(); }
 
 void GPURenderPassEncoder::setBindGroup(
     Napi::Env, interop::GPUIndex32 index,
@@ -96,16 +98,33 @@ void GPURenderPassEncoder::insertDebugMarker(Napi::Env,
 }
 
 void GPURenderPassEncoder::setPipeline(
-    Napi::Env, interop::Interface<interop::GPURenderPipeline> pipeline) {
-  UNIMPLEMENTED();
+    Napi::Env env, interop::Interface<interop::GPURenderPipeline> pipeline) {
+  Converter conv(env);
+  wgpu::RenderPipeline rp{};
+  if (!conv(rp, pipeline)) {
+    return;
+  }
+  enc_.SetPipeline(rp);
 }
 
 void GPURenderPassEncoder::setIndexBuffer(
-    Napi::Env, interop::Interface<interop::GPUBuffer> buffer,
+    Napi::Env env, interop::Interface<interop::GPUBuffer> buffer,
     interop::GPUIndexFormat indexFormat,
     std::optional<interop::GPUSize64> offset,
     std::optional<interop::GPUSize64> size) {
-  UNIMPLEMENTED();
+  Converter conv(env);
+
+  wgpu::Buffer buf{};
+  wgpu::IndexFormat fmt;
+  uint64_t off = 0;
+  uint64_t sz = 0;
+  if (!conv(buf, buffer) ||       //
+      !conv(fmt, indexFormat) ||  //
+      !conv(off, offset) ||       //
+      !conv(sz, size)) {
+    return;
+  }
+  enc_.SetIndexBuffer(buf, fmt, off, sz);
 }
 
 void GPURenderPassEncoder::setVertexBuffer(
@@ -125,12 +144,27 @@ void GPURenderPassEncoder::draw(
 }
 
 void GPURenderPassEncoder::drawIndexed(
-    Napi::Env, interop::GPUSize32 indexCount,
+    Napi::Env env, interop::GPUSize32 indexCount,
     std::optional<interop::GPUSize32> instanceCount,
     std::optional<interop::GPUSize32> firstIndex,
     std::optional<interop::GPUSignedOffset32> baseVertex,
     std::optional<interop::GPUSize32> firstInstance) {
-  UNIMPLEMENTED();
+  Converter conv(env);
+
+  uint32_t idx_cnt = 0;
+  uint32_t ins_cnt = 0;
+  uint32_t first_idx = 0;
+  int32_t base = 0;
+  uint32_t first_inst = 0;
+
+  if (!conv(idx_cnt, indexCount) ||     //
+      !conv(ins_cnt, instanceCount) ||  //
+      !conv(first_idx, firstIndex) ||   //
+      !conv(base, baseVertex) ||        //
+      !conv(first_inst, firstInstance)) {
+    return;
+  }
+  enc_.DrawIndexed(idx_cnt, ins_cnt, first_idx, base, first_inst);
 }
 
 void GPURenderPassEncoder::drawIndirect(

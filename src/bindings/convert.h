@@ -24,6 +24,7 @@ struct ImplOf {};
 DECLARE_IMPL(GPUBuffer);
 DECLARE_IMPL(GPUPipelineLayout);
 DECLARE_IMPL(GPUQuerySet);
+DECLARE_IMPL(GPURenderPipeline);
 DECLARE_IMPL(GPUShaderModule);
 DECLARE_IMPL(GPUTexture);
 DECLARE_IMPL(GPUTextureView);
