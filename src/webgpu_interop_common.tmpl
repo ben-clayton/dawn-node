@@ -20,6 +20,14 @@
 
 {{- /**********************************************************************/ -}}
 
+{{- define "AttributeType" -}}
+{{-   if   $.Required}}{{template "Type" $.Type}}
+{{-   else           }}std::optional<{{template "Type" $.Type}}>
+{{-   end}}
+{{- end }}
+
+{{- /**********************************************************************/ -}}
+
 {{- define "Literal" -}}
 {{-        if IsBasicLiteral $}}{{$.Value}}
 {{-   else                    }} /* Unhandled Type {{printf "%T" $}} */

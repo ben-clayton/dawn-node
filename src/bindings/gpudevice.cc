@@ -119,8 +119,10 @@ void GPUDevice::destroy(Napi::Env) { device_.Release(); }
 interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(
     Napi::Env env, interop::GPUBufferDescriptor descriptor) {
   wgpu::BufferDescriptor desc{};
-  desc.label = descriptor.label.c_str();
-  desc.mappedAtCreation = descriptor.mappedAtCreation;
+  if (descriptor.label.has_value()) {
+    desc.label = descriptor.label.value().c_str();
+  }
+  desc.mappedAtCreation = descriptor.mappedAtCreation.value_or(false);
   desc.size = descriptor.size;
   if (!Convert(env, desc.usage, descriptor.usage)) {
     return {};
@@ -134,15 +136,21 @@ interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(
 interop::Interface<interop::GPUTexture> GPUDevice::createTexture(
     Napi::Env env, interop::GPUTextureDescriptor descriptor) {
   wgpu::TextureDescriptor desc{};
-  desc.label = descriptor.label.c_str();
-  if (!Convert(env, desc.usage, descriptor.usage) ||          //
-      !Convert(env, desc.dimension, descriptor.dimension) ||  //
-      !Convert(env, desc.size, descriptor.size) ||            //
+  if (descriptor.label.has_value()) {
+    desc.label = descriptor.label.value().c_str();
+  }
+  if (descriptor.dimension.has_value()) {
+    if (!Convert(env, desc.dimension, descriptor.dimension.value())) {
+      return {};
+    }
+  }
+  if (!Convert(env, desc.usage, descriptor.usage) ||  //
+      !Convert(env, desc.size, descriptor.size) ||    //
       !Convert(env, desc.format, descriptor.format)) {
     return {};
   }
-  desc.mipLevelCount = descriptor.mipLevelCount;
-  desc.sampleCount = descriptor.sampleCount;
+  desc.mipLevelCount = descriptor.mipLevelCount.value_or(1);
+  desc.sampleCount = descriptor.sampleCount.value_or(1);
   return interop::GPUTexture::Create<GPUTexture>(env,
                                                  device_.CreateTexture(&desc));
 }

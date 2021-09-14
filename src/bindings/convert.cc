@@ -10,9 +10,9 @@ bool Convert(Napi::Env env, wgpu::Extent3D& out,
              const interop::GPUExtent3D& in) {
   out = {};
   if (auto* dict = std::get_if<interop::GPUExtent3DDict>(&in)) {
-    out.depthOrArrayLayers = dict->depthOrArrayLayers;
+    out.depthOrArrayLayers = dict->depthOrArrayLayers.value_or(1);
     out.width = dict->width;
-    out.height = dict->height;
+    out.height = dict->height.value_or(1);
     return true;
   }
   if (auto* vec =
@@ -37,9 +37,9 @@ bool Convert(Napi::Env env, wgpu::Origin3D& out,
              const interop::GPUOrigin3D& in) {
   out = {};
   if (auto* dict = std::get_if<interop::GPUOrigin3DDict>(&in)) {
-    out.x = dict->x;
-    out.y = dict->y;
-    out.z = dict->z;
+    out.x = dict->x.value_or(0);
+    out.y = dict->y.value_or(0);
+    out.z = dict->z.value_or(0);
     return true;
   }
   if (auto* vec =
@@ -83,19 +83,28 @@ bool Convert(Napi::Env env, wgpu::ImageCopyTexture& out,
              const interop::GPUImageCopyTexture& in) {
   out = {};
   out.texture = *in.texture.As<GPUTexture>();
-  out.mipLevel = in.mipLevel;
+  out.mipLevel = in.mipLevel.value_or(0);
   wgpu::Extent3D size{};
-  return Convert(env, out.origin, in.origin) &&
-         Convert(env, out.aspect, in.aspect);
+  if (in.origin.has_value()) {
+    if (!Convert(env, out.origin, in.origin.value())) {
+      return false;
+    }
+  }
+  if (in.aspect.has_value()) {
+    if (!Convert(env, out.aspect, in.aspect.value())) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool Convert(Napi::Env env, wgpu::ImageCopyBuffer& out,
              const interop::GPUImageCopyBuffer& in) {
   out = {};
   out.buffer = *in.buffer.As<GPUBuffer>();
-  out.layout.offset = in.offset;
-  out.layout.bytesPerRow = in.bytesPerRow;
-  out.layout.rowsPerImage = in.rowsPerImage;
+  out.layout.offset = in.offset.value_or(0);
+  out.layout.bytesPerRow = in.bytesPerRow.value_or(0);
+  out.layout.rowsPerImage = in.rowsPerImage.value_or(0);
   return true;
 }
 
@@ -123,9 +132,9 @@ bool Convert(Napi::Env env, BufferSource& out,
 bool Convert(Napi::Env env, wgpu::TextureDataLayout& out,
              const interop::GPUImageDataLayout& in) {
   out = {};
-  out.bytesPerRow = in.bytesPerRow;
-  out.offset = in.offset;
-  out.rowsPerImage = in.rowsPerImage;
+  out.bytesPerRow = in.bytesPerRow.value_or(0);
+  out.offset = in.offset.value_or(0);
+  out.rowsPerImage = in.rowsPerImage.value_or(0);
   return true;
 }
 

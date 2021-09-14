@@ -36,7 +36,7 @@ class {{$.Name}} {{- if $.Inherits }} : public {{$.Inherits}}{{end}} {
 public:
 {{   range $m := $.Members}}
 {{-    if      IsConstructor $m}}  {{$.Name}}();
-{{     else if IsMember      $m}}  {{template "Member" $m}}
+{{     else if IsMember      $m}}  {{template "DictionaryMember" $m}}
 {{     end}}
 {{-  end -}}
 };
@@ -103,8 +103,8 @@ public:
 
 {{- /**********************************************************************/ -}}
 
-{{- define "Member"}}
-{{-   if $.Attribute}}{{template "Type" $.Type}} {{$.Name}};
+{{- define "DictionaryMember"}}
+{{-   if $.Attribute}}{{template "AttributeType" $}} {{$.Name}};
 {{-   else          }}{{template "Type" $.Type}} {{$.Name}}({{template "Parameters" $.Parameters}});
 {{-   end }}
 {{- end }}

@@ -19,14 +19,24 @@ interop::Interface<interop::GPUTextureView> GPUTexture::createView(
     std::optional<interop::GPUTextureViewDescriptor> descriptor) {
   if (descriptor.has_value()) {
     wgpu::TextureViewDescriptor desc{};
-    desc.baseMipLevel = descriptor->baseMipLevel;
-    desc.mipLevelCount = descriptor->mipLevelCount;
-    desc.baseArrayLayer = descriptor->baseArrayLayer;
-    desc.arrayLayerCount = descriptor->arrayLayerCount;
-    if (!Convert(env, desc.format, descriptor->format) ||
-        !Convert(env, desc.dimension, descriptor->dimension) ||
-        !Convert(env, desc.aspect, descriptor->aspect)) {
-      return {};
+    desc.baseMipLevel = descriptor->baseMipLevel.value_or(0);
+    desc.mipLevelCount = descriptor->mipLevelCount.value_or(0);
+    desc.baseArrayLayer = descriptor->baseArrayLayer.value_or(0);
+    desc.arrayLayerCount = descriptor->arrayLayerCount.value_or(0);
+    if (descriptor->format.has_value()) {
+      if (!Convert(env, desc.format, descriptor->format.value())) {
+        return {};
+      }
+    }
+    if (descriptor->dimension.has_value()) {
+      if (!Convert(env, desc.dimension, descriptor->dimension.value())) {
+        return {};
+      }
+    }
+    if (descriptor->aspect.has_value()) {
+      if (!Convert(env, desc.aspect, descriptor->aspect.value())) {
+        return {};
+      }
     }
     return interop::GPUTextureView::Create<GPUTextureView>(
         env, texture_.CreateView(&desc));

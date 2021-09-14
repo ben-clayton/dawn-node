@@ -57,7 +57,7 @@ Napi::Value Serializer<{{$.Name}}>::Marshal(Napi::Env env, {{$.Name}} value) {
 {{- define "UnmarshalDictionaryMembers"}}
 {{-    if $.Inherits}}{{template "UnmarshalDictionaryMembers" (Lookup $.Inherits)}}{{end}}
 {{-    range $m := $.Members}}
-    interop::Unmarshal<{{template "Type" $m.Type}}>(object.Get("{{$m.Name}}")),
+    interop::Unmarshal<{{template "AttributeType" $m}}>(object.Get("{{$m.Name}}")),
 {{-    end}}
 {{- end}}
 

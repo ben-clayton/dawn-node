@@ -238,7 +238,7 @@ template <typename T>
 class Serializer<std::optional<T>> {
  public:
   static std::optional<T> Unmarshal(Napi::Value value) {
-    if (value.IsNull()) {
+    if (value.IsNull() || value.IsUndefined()) {
       return {};
     }
     return Serializer<T>::Unmarshal(value);
