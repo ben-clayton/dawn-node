@@ -6,6 +6,7 @@
 #include "src/bindings/gpu.h"
 #include "src/bindings/gpubuffer.h"
 #include "src/bindings/gpucommandbuffer.h"
+#include "src/bindings/gpucomputepassencoder.h"
 #include "src/bindings/gputexture.h"
 #include "src/utils/debug.h"
 
@@ -26,8 +27,11 @@ GPUCommandEncoder::beginRenderPass(
 
 interop::Interface<interop::GPUComputePassEncoder>
 GPUCommandEncoder::beginComputePass(
-    Napi::Env, std::optional<interop::GPUComputePassDescriptor> descriptor) {
-  UNIMPLEMENTED();
+    Napi::Env env,
+    std::optional<interop::GPUComputePassDescriptor> descriptor) {
+  wgpu::ComputePassDescriptor desc{};
+  return interop::GPUComputePassEncoder::Create<GPUComputePassEncoder>(
+      env, cmd_enc_.BeginComputePass(&desc));
 }
 
 void GPUCommandEncoder::copyBufferToBuffer(
@@ -47,10 +51,9 @@ void GPUCommandEncoder::copyBufferToTexture(
   wgpu::ImageCopyBuffer src{};
   wgpu::ImageCopyTexture dst{};
   wgpu::Extent3D size{};
-  if (!Convert(src, source) ||       //
-      !Convert(dst, destination) ||  //
-      !Convert(size, copySize)) {
-    Napi::Error::New(env, "invalid argument").ThrowAsJavaScriptException();
+  if (!Convert(env, src, source) ||       //
+      !Convert(env, dst, destination) ||  //
+      !Convert(env, size, copySize)) {
     return;
   }
   cmd_enc_.CopyBufferToTexture(&src, &dst, &size);
@@ -62,10 +65,9 @@ void GPUCommandEncoder::copyTextureToBuffer(
   wgpu::ImageCopyTexture src{};
   wgpu::ImageCopyBuffer dst{};
   wgpu::Extent3D size{};
-  if (!Convert(src, source) ||       //
-      !Convert(dst, destination) ||  //
-      !Convert(size, copySize)) {
-    Napi::Error::New(env, "invalid argument").ThrowAsJavaScriptException();
+  if (!Convert(env, src, source) ||       //
+      !Convert(env, dst, destination) ||  //
+      !Convert(env, size, copySize)) {
     return;
   }
   cmd_enc_.CopyTextureToBuffer(&src, &dst, &size);

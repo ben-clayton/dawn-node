@@ -254,7 +254,7 @@ class Serializer<std::optional<T>> {
 template <typename T>
 class Serializer<std::vector<T>> {
  public:
-  static std::vector<T> Unmarshal(Napi::Value value) {
+  static inline std::vector<T> Unmarshal(Napi::Value value) {
     auto arr = value.As<Napi::Array>();
     std::vector<T> vec(arr.Length());
     for (size_t i = 0; i < vec.size(); i++) {
@@ -262,7 +262,7 @@ class Serializer<std::vector<T>> {
     }
     return vec;
   }
-  static Napi::Value Marshal(Napi::Env env, const std::vector<T>& vec) {
+  static inline Napi::Value Marshal(Napi::Env env, const std::vector<T>& vec) {
     auto arr = Napi::Array::New(env, vec.size());
     for (size_t i = 0; i < vec.size(); i++) {
       arr.Set(i, Serializer<T>::Marshal(env, vec[i]));
@@ -274,19 +274,37 @@ class Serializer<std::vector<T>> {
 template <typename K, typename V>
 class Serializer<std::unordered_map<K, V>> {
  public:
-  static std::unordered_map<K, V> Unmarshal(Napi::Value);
-  static Napi::Value Marshal(Napi::Env, std::unordered_map<K, V>);
+  static inline std::unordered_map<K, V> Unmarshal(Napi::Value value) {
+    auto obj = value.ToObject();
+    auto keys = obj.GetPropertyNames();
+    std::unordered_map<K, V> map(keys.Length());
+    for (size_t i = 0; i < map.size(); i++) {
+      auto key = Serializer<K>::Unmarshal(keys[i]);
+      auto value = Serializer<V>::Unmarshal(obj.Get(keys[i]));
+      map[key] = value;
+    }
+    return map;
+  }
+  static inline Napi::Value Marshal(Napi::Env env,
+                                    std::unordered_map<K, V> value) {
+    auto obj = Napi::Object::New(env);
+    for (auto it : value) {
+      obj.Set(Serializer<K>::Marshal(env, it.first),
+              Serializer<V>::Marshal(env, it.second));
+    }
+    return obj;
+  }
 };
 
 template <typename... TYPES>
 class Serializer<std::variant<TYPES...>> {
   template <typename TY>
-  static std::variant<TYPES...> TryUnmarshal(Napi::Value value) {
+  static inline std::variant<TYPES...> TryUnmarshal(Napi::Value value) {
     return {Serializer<TY>::Unmarshal(value)};
   }
 
   template <typename T0, typename T1, typename... TN>
-  static std::variant<TYPES...> TryUnmarshal(Napi::Value value) {
+  static inline std::variant<TYPES...> TryUnmarshal(Napi::Value value) {
     try {
       return TryUnmarshal<T0>(value);
     } catch (Napi::Error) {
@@ -295,10 +313,11 @@ class Serializer<std::variant<TYPES...>> {
   }
 
  public:
-  static std::variant<TYPES...> Unmarshal(Napi::Value value) {
+  static inline std::variant<TYPES...> Unmarshal(Napi::Value value) {
     return TryUnmarshal<TYPES...>(value);
   }
-  static Napi::Value Marshal(Napi::Env env, std::variant<TYPES...> value) {
+  static inline Napi::Value Marshal(Napi::Env env,
+                                    std::variant<TYPES...> value) {
     return std::visit(
         [&](auto&& v) {
           using T = std::remove_cv_t<std::remove_reference_t<decltype(v)>>;
@@ -311,8 +330,10 @@ class Serializer<std::variant<TYPES...>> {
 template <typename T>
 class Serializer<Promise<T>> {
  public:
-  static Promise<T> Unmarshal(Napi::Value);
-  static Napi::Value Marshal(Napi::Env, Promise<T>);
+  static inline Promise<T> Unmarshal(Napi::Value) { return {}; }
+  static inline Napi::Value Marshal(Napi::Env, Promise<T> promise) {
+    return promise.Value();
+  }
 };
 
 template <typename T>
@@ -324,17 +345,6 @@ template <typename T>
 inline Napi::Value Marshal(Napi::Env env, T&& value) {
   return Serializer<std::remove_cv_t<std::remove_reference_t<T>>>::Marshal(
       env, std::forward<T>(value));
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename T>
-Promise<T> Serializer<Promise<T>>::Unmarshal(Napi::Value) {
-  return {};
-}
-template <typename T>
-Napi::Value Serializer<Promise<T>>::Marshal(Napi::Env, Promise<T> promise) {
-  return promise.Value();
 }
 
 }  // namespace interop

@@ -1,5 +1,6 @@
 #include "src/bindings/gpubuffer.h"
 
+#include "src/bindings/convert.h"
 #include "src/bindings/gpudevice.h"
 #include "src/utils/debug.h"
 
@@ -17,7 +18,11 @@ interop::Promise<void> GPUBuffer::mapAsync(
     Napi::Env env, interop::GPUMapModeFlags mode,
     std::optional<interop::GPUSize64> offset,
     std::optional<interop::GPUSize64> size) {
-  wgpu::MapMode md = static_cast<wgpu::MapMode>(mode);
+  wgpu::MapMode md{};
+  if (!Convert(env, md, mode)) {
+    return {env};
+  }
+
   // LOG("mode: ", md, ", offset: ", offset, ", size: ", size);
 
   struct Context {

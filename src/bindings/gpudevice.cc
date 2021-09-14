@@ -122,7 +122,9 @@ interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(
   desc.label = descriptor.label.c_str();
   desc.mappedAtCreation = descriptor.mappedAtCreation;
   desc.size = descriptor.size;
-  desc.usage = static_cast<wgpu::BufferUsage>(descriptor.usage);
+  if (!Convert(env, desc.usage, descriptor.usage)) {
+    return {};
+  }
   //  LOG("label: ", desc.label, ", mappedAtCreation: ", desc.mappedAtCreation,
   //      ", size: ", desc.size, ", usage: ", desc.usage);
   return interop::GPUBuffer::Create<GPUBuffer>(env, device_.CreateBuffer(&desc),
@@ -131,14 +133,12 @@ interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(
 
 interop::Interface<interop::GPUTexture> GPUDevice::createTexture(
     Napi::Env env, interop::GPUTextureDescriptor descriptor) {
-  // TODO: Add proper converters, avoid static_cast
   wgpu::TextureDescriptor desc{};
   desc.label = descriptor.label.c_str();
-  desc.usage = static_cast<wgpu::TextureUsage>(descriptor.usage);
-  desc.dimension = static_cast<wgpu::TextureDimension>(descriptor.dimension);
-  if (!Convert(desc.size, descriptor.size) ||  //
-      !Convert(desc.format, descriptor.format)) {
-    Napi::Error::New(env, "invalid argument").ThrowAsJavaScriptException();
+  if (!Convert(env, desc.usage, descriptor.usage) ||          //
+      !Convert(env, desc.dimension, descriptor.dimension) ||  //
+      !Convert(env, desc.size, descriptor.size) ||            //
+      !Convert(env, desc.format, descriptor.format)) {
     return {};
   }
   desc.mipLevelCount = descriptor.mipLevelCount;

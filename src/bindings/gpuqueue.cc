@@ -62,8 +62,7 @@ void GPUQueue::writeBuffer(Napi::Env env,
                            std::optional<interop::GPUSize64> size) {
   wgpu::Buffer buf = *buffer.As<GPUBuffer>();
   BufferSource src{};
-  if (!Convert(src, data)) {
-    Napi::Error::New(env, "invalid argument").ThrowAsJavaScriptException();
+  if (!Convert(env, src, data)) {
     return;
   }
 
@@ -88,11 +87,10 @@ void GPUQueue::writeTexture(Napi::Env env,
   BufferSource src{};
   wgpu::TextureDataLayout layout{};
   wgpu::Extent3D sz{};
-  if (!Convert(dst, destination) ||    //
-      !Convert(src, data) ||           //
-      !Convert(layout, dataLayout) ||  //
-      !Convert(sz, size)) {
-    Napi::Error::New(env, "invalid argument").ThrowAsJavaScriptException();
+  if (!Convert(env, dst, destination) ||    //
+      !Convert(env, src, data) ||           //
+      !Convert(env, layout, dataLayout) ||  //
+      !Convert(env, sz, size)) {
     return;
   }
 

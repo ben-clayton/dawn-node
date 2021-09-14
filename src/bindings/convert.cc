@@ -6,7 +6,8 @@
 namespace wgpu {
 namespace bindings {
 
-bool Convert(wgpu::Extent3D& out, const interop::GPUExtent3D& in) {
+bool Convert(Napi::Env env, wgpu::Extent3D& out,
+             const interop::GPUExtent3D& in) {
   out = {};
   if (auto* dict = std::get_if<interop::GPUExtent3DDict>(&in)) {
     out.depthOrArrayLayers = dict->depthOrArrayLayers;
@@ -27,10 +28,13 @@ bool Convert(wgpu::Extent3D& out, const interop::GPUExtent3D& in) {
         return true;
     }
   }
+  Napi::Error::New(env, "invalid value for GPUExtent3D")
+      .ThrowAsJavaScriptException();
   return false;
 }
 
-bool Convert(wgpu::Origin3D& out, const interop::GPUOrigin3D& in) {
+bool Convert(Napi::Env env, wgpu::Origin3D& out,
+             const interop::GPUOrigin3D& in) {
   out = {};
   if (auto* dict = std::get_if<interop::GPUOrigin3DDict>(&in)) {
     out.x = dict->x;
@@ -51,10 +55,13 @@ bool Convert(wgpu::Origin3D& out, const interop::GPUOrigin3D& in) {
         return true;
     }
   }
+  Napi::Error::New(env, "invalid value for GPUOrigin3D")
+      .ThrowAsJavaScriptException();
   return false;
 }
 
-bool Convert(wgpu::TextureAspect& out, const interop::GPUTextureAspect& in) {
+bool Convert(Napi::Env env, wgpu::TextureAspect& out,
+             const interop::GPUTextureAspect& in) {
   out = wgpu::TextureAspect::All;
   switch (in) {
     case interop::GPUTextureAspect::kAll:
@@ -67,19 +74,22 @@ bool Convert(wgpu::TextureAspect& out, const interop::GPUTextureAspect& in) {
       out = wgpu::TextureAspect::DepthOnly;
       return true;
   }
+  Napi::Error::New(env, "invalid value for GPUTextureAspect")
+      .ThrowAsJavaScriptException();
   return false;
 }
 
-bool Convert(wgpu::ImageCopyTexture& out,
+bool Convert(Napi::Env env, wgpu::ImageCopyTexture& out,
              const interop::GPUImageCopyTexture& in) {
   out = {};
   out.texture = *in.texture.As<GPUTexture>();
   out.mipLevel = in.mipLevel;
   wgpu::Extent3D size{};
-  return Convert(out.origin, in.origin) && Convert(out.aspect, in.aspect);
+  return Convert(env, out.origin, in.origin) &&
+         Convert(env, out.aspect, in.aspect);
 }
 
-bool Convert(wgpu::ImageCopyBuffer& out,
+bool Convert(Napi::Env env, wgpu::ImageCopyBuffer& out,
              const interop::GPUImageCopyBuffer& in) {
   out = {};
   out.buffer = *in.buffer.As<GPUBuffer>();
@@ -89,7 +99,8 @@ bool Convert(wgpu::ImageCopyBuffer& out,
   return true;
 }
 
-bool Convert(BufferSource& out, const interop::BufferSource& in) {
+bool Convert(Napi::Env env, BufferSource& out,
+             const interop::BufferSource& in) {
   out = {};
   if (auto* view = std::get_if<interop::ArrayBufferView>(&in)) {
     std::visit(
@@ -104,10 +115,12 @@ bool Convert(BufferSource& out, const interop::BufferSource& in) {
   if (auto* buf = std::get_if<interop::ArrayBuffer>(&in)) {
     return true;
   }
+  Napi::Error::New(env, "invalid value for BufferSource")
+      .ThrowAsJavaScriptException();
   return false;
 }
 
-bool Convert(wgpu::TextureDataLayout& out,
+bool Convert(Napi::Env env, wgpu::TextureDataLayout& out,
              const interop::GPUImageDataLayout& in) {
   out = {};
   out.bytesPerRow = in.bytesPerRow;
@@ -116,7 +129,9 @@ bool Convert(wgpu::TextureDataLayout& out,
   return true;
 }
 
-bool Convert(wgpu::TextureFormat& out, const interop::GPUTextureFormat& in) {
+bool Convert(Napi::Env env, wgpu::TextureFormat& out,
+             const interop::GPUTextureFormat& in) {
+  out = wgpu::TextureFormat::Undefined;
   switch (in) {
     case interop::GPUTextureFormat::kR8Unorm:
       out = wgpu::TextureFormat::R8Unorm;
@@ -230,7 +245,7 @@ bool Convert(wgpu::TextureFormat& out, const interop::GPUTextureFormat& in) {
       out = wgpu::TextureFormat::Stencil8;
       return true;
     case interop::GPUTextureFormat::kDepth16Unorm:
-      return false;  // TODO: ???
+      break;  // TODO: ???
     case interop::GPUTextureFormat::kDepth24Plus:
       out = wgpu::TextureFormat::Depth24Plus;
       return true;
@@ -286,9 +301,76 @@ bool Convert(wgpu::TextureFormat& out, const interop::GPUTextureFormat& in) {
       out = wgpu::TextureFormat::Depth24PlusStencil8;
       return true;
     case interop::GPUTextureFormat::kDepth32FloatStencil8:
-      return false;  // TODO: ???
+      break;  // TODO: ???
   }
+  Napi::Error::New(env, "invalid value for GPUTextureFormat")
+      .ThrowAsJavaScriptException();
   return false;
+}
+
+bool Convert(Napi::Env env, wgpu::TextureUsage& out,
+             const interop::GPUTextureUsageFlags& in) {
+  out = static_cast<wgpu::TextureUsage>(in);
+  return true;
+}
+
+bool Convert(Napi::Env env, wgpu::TextureDimension& out,
+             const interop::GPUTextureDimension& in) {
+  out = wgpu::TextureDimension::e1D;
+  switch (in) {
+    case interop::GPUTextureDimension::k1D:
+      out = wgpu::TextureDimension::e1D;
+      return true;
+    case interop::GPUTextureDimension::k2D:
+      out = wgpu::TextureDimension::e2D;
+      return true;
+    case interop::GPUTextureDimension::k3D:
+      out = wgpu::TextureDimension::e3D;
+      return true;
+  }
+  Napi::Error::New(env, "invalid value for GPUTextureDimension")
+      .ThrowAsJavaScriptException();
+  return false;
+}
+
+bool Convert(Napi::Env env, wgpu::TextureViewDimension& out,
+             const interop::GPUTextureViewDimension& in) {
+  out = wgpu::TextureViewDimension::Undefined;
+  switch (in) {
+    case interop::GPUTextureViewDimension::k1D:
+      out = wgpu::TextureViewDimension::e1D;
+      return true;
+    case interop::GPUTextureViewDimension::k2D:
+      out = wgpu::TextureViewDimension::e2D;
+      return true;
+    case interop::GPUTextureViewDimension::k2DArray:
+      out = wgpu::TextureViewDimension::e2DArray;
+      return true;
+    case interop::GPUTextureViewDimension::kCube:
+      out = wgpu::TextureViewDimension::Cube;
+      return true;
+    case interop::GPUTextureViewDimension::kCubeArray:
+      out = wgpu::TextureViewDimension::CubeArray;
+      return true;
+    case interop::GPUTextureViewDimension::k3D:
+      out = wgpu::TextureViewDimension::e3D;
+      return true;
+  }
+  Napi::Error::New(env, "invalid value for GPUTextureViewDimension")
+      .ThrowAsJavaScriptException();
+  return false;
+}
+
+bool Convert(Napi::Env env, wgpu::BufferUsage& out,
+             const interop::GPUBufferUsageFlags& in) {
+  out = static_cast<wgpu::BufferUsage>(in);
+  return true;
+}
+
+bool Convert(Napi::Env env, wgpu::MapMode& out,
+             const interop::GPUMapModeFlags& in) {
+  out = static_cast<wgpu::MapMode>(in);
+  return true;
 }
 
 }  // namespace bindings
