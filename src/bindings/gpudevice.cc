@@ -7,6 +7,7 @@
 #include "src/bindings/gpucommandbuffer.h"
 #include "src/bindings/gpucommandencoder.h"
 #include "src/bindings/gpuqueue.h"
+#include "src/bindings/gpushadermodule.h"
 #include "src/bindings/gputexture.h"
 #include "src/utils/debug.h"
 
@@ -183,8 +184,13 @@ interop::Interface<interop::GPUBindGroup> GPUDevice::createBindGroup(
 }
 
 interop::Interface<interop::GPUShaderModule> GPUDevice::createShaderModule(
-    Napi::Env, interop::GPUShaderModuleDescriptor descriptor) {
-  UNIMPLEMENTED();
+    Napi::Env env, interop::GPUShaderModuleDescriptor descriptor) {
+  wgpu::ShaderModuleDescriptor desc{};
+  if (descriptor.label.has_value()) {
+    desc.label = descriptor.label.value().c_str();
+  }
+  return interop::GPUShaderModule::Create<GPUShaderModule>(
+      env, device_.CreateShaderModule(&desc), this);
 }
 
 interop::Interface<interop::GPUComputePipeline>

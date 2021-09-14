@@ -102,6 +102,8 @@ set(SRC_FILES
     "src/bindings/gpudevice.h"
     "src/bindings/gpuqueue.cc"
     "src/bindings/gpuqueue.h"
+    "src/bindings/gpushadermodule.cc"
+    "src/bindings/gpushadermodule.h"
     "src/bindings/gputexture.cc"
     "src/bindings/gputexture.h"
     "src/bindings/gputextureview.cc"
