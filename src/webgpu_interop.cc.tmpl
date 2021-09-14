@@ -148,18 +148,24 @@ Wrappers* Wrappers::instance = nullptr;
     W{{$.Name}}(const Napi::CallbackInfo& info) : ObjectWrap(info) {}
 {{-  range $m := MethodsOf $}}
     Napi::Value {{$m.Name}}(const Napi::CallbackInfo& info) {
-      {{/* indent */}}
-{{-    if not (IsUndefinedType $m.Type) }}auto result = {{end}}impl->{{$m.Name}}(info.Env()
-{{-      range $i, $p := $m.Parameters}},
+{{-    range $o := $m.Overloads}}
+      try {
         {{/* indent */}}
-{{-        if $p.Optional}}info[{{$i}}].IsUndefined() ? std::optional<{{template "Type" $p.Type}}>{} : {{end -}}
-        Serializer<{{template "Type" $p.Type}}>::Unmarshal(info.Env(), info[{{$i}}])
-{{-      end -}}
+{{-      if not (IsUndefinedType $o.Type) }}auto result = {{end}}impl->{{$o.Name}}(info.Env()
+{{-        range $i, $p := $o.Parameters}},
+          {{/* indent */}}
+{{-          if $p.Optional}}info[{{$i}}].IsUndefined() ? std::optional<{{template "Type" $p.Type}}>{} : {{end -}}
+          Serializer<{{template "Type" $p.Type}}>::Unmarshal(info.Env(), info[{{$i}}])
+{{-        end -}}
         );
-      {{/* indent */ -}}
-{{-    if   IsUndefinedType $m.Type}}return info.Env().Null();
-{{-    else                        }}return Marshal(info.Env(), result);
-{{-    end                         }}
+        {{/* indent */ -}}
+{{-      if   IsUndefinedType $o.Type}}return info.Env().Null();
+{{-      else                        }}return Marshal(info.Env(), result);
+{{-      end                         }}
+      } catch (Napi::Error) {}
+{{-    end}}
+      Napi::Error::New(info.Env(), "invalid arguments to {{$m.Name}}").ThrowAsJavaScriptException();
+      return {};
     }
 {{-  end}}
 

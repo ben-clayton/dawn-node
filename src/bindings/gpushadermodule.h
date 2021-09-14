@@ -19,6 +19,8 @@ class GPUShaderModule : public interop::GPUShaderModule {
 
   interop::Promise<interop::Interface<interop::GPUCompilationInfo>>
       compilationInfo(Napi::Env) override;
+  std::optional<std::string> getLabel(Napi::Env) override;
+  void setLabel(Napi::Env, std::optional<std::string> value) override;
 
  private:
   wgpu::ShaderModule shader_;

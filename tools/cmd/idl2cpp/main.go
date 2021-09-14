@@ -134,6 +134,7 @@ func sanitize(in *ast.File) (*ast.File, declarations) {
 
 	{
 		interfaces := map[string]*ast.Interface{}
+		mixins := map[string]*ast.Mixin{}
 		for _, d := range in.Declarations {
 			switch d := d.(type) {
 			case *ast.Interface:
@@ -145,6 +146,25 @@ func sanitize(in *ast.File) (*ast.File, declarations) {
 					d := &clone
 					interfaces[d.Name] = d
 					s.declarations[d.Name] = d
+				}
+			case *ast.Mixin:
+				mixins[d.Name] = d
+				s.declarations[d.Name] = d
+			case *ast.Includes:
+				// Merge mixin into interface
+				i, ok := interfaces[d.Name]
+				if !ok {
+					panic(fmt.Errorf("%v includes %v, but %v is not an interface", d.Name, d.Source, d.Name))
+				}
+				m, ok := mixins[d.Source]
+				if !ok {
+					panic(fmt.Errorf("%v includes %v, but %v is not an mixin", d.Name, d.Source, d.Source))
+				}
+				// Merge mixin into the interface
+				for _, member := range m.Members {
+					if member, ok := member.(*ast.Member); ok {
+						i.Members = append(i.Members, member)
+					}
 				}
 			default:
 				if name := nameOf(d); name != "" {
@@ -367,12 +387,27 @@ func enumEntryName(s string) string {
 	return "k" + strings.ReplaceAll(pascalCase(strings.Trim(s, `"`)), "-", "")
 }
 
-func methodsOf(iface *ast.Interface) []*ast.Member {
-	out := []*ast.Member{}
-	for _, m := range iface.Members {
-		m := m.(*ast.Member)
-		if !m.Const && !m.Attribute && !isConstructor(m) {
-			out = append(out, m)
+type Method struct {
+	Name      string
+	Overloads []*ast.Member
+}
+
+func methodsOf(iface *ast.Interface) []*Method {
+	byName := map[string]*Method{}
+	out := []*Method{}
+	for _, member := range iface.Members {
+		member := member.(*ast.Member)
+		if !member.Const && !member.Attribute && !isConstructor(member) {
+			if method, ok := byName[member.Name]; ok {
+				method.Overloads = append(method.Overloads, member)
+			} else {
+				method = &Method{
+					Name:      member.Name,
+					Overloads: []*ast.Member{member},
+				}
+				byName[member.Name] = method
+				out = append(out, method)
+			}
 		}
 	}
 	return out

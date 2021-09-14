@@ -60,6 +60,8 @@ class GPUDevice : public interop::GPUDevice {
   void pushErrorScope(Napi::Env, interop::GPUErrorFilter filter) override;
   interop::Promise<std::optional<interop::GPUError>> popErrorScope(
       Napi::Env env) override;
+  std::optional<std::string> getLabel(Napi::Env) override;
+  void setLabel(Napi::Env, std::optional<std::string> value) override;
   interop::Interface<interop::EventHandler> getOnuncapturederror(
       Napi::Env) override;
   void setOnuncapturederror(

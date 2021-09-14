@@ -32,6 +32,20 @@ class GPUComputePassEncoder : public interop::GPUComputePassEncoder {
                       interop::Interface<interop::GPUQuerySet> querySet,
                       interop::GPUSize32 queryIndex) override;
   void endPass(Napi::Env) override;
+  void setBindGroup(Napi::Env, interop::GPUIndex32 index,
+                    interop::Interface<interop::GPUBindGroup> bindGroup,
+                    std::optional<std::vector<interop::GPUBufferDynamicOffset>>
+                        dynamicOffsets) override;
+  void setBindGroup(Napi::Env, interop::GPUIndex32 index,
+                    interop::Interface<interop::GPUBindGroup> bindGroup,
+                    interop::Uint32Array dynamicOffsetsData,
+                    interop::GPUSize64 dynamicOffsetsDataStart,
+                    interop::GPUSize32 dynamicOffsetsDataLength) override;
+  void pushDebugGroup(Napi::Env, std::string groupLabel) override;
+  void popDebugGroup(Napi::Env) override;
+  void insertDebugMarker(Napi::Env, std::string markerLabel) override;
+  std::optional<std::string> getLabel(Napi::Env) override;
+  void setLabel(Napi::Env, std::optional<std::string> value) override;
 
  private:
   wgpu::ComputePassEncoder enc_;

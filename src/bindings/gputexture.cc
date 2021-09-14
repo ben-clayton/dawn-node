@@ -39,5 +39,11 @@ interop::Interface<interop::GPUTextureView> GPUTexture::createView(
 
 void GPUTexture::destroy(Napi::Env) { texture_.Release(); }
 
+std::optional<std::string> GPUTexture::getLabel(Napi::Env) { UNIMPLEMENTED(); }
+
+void GPUTexture::setLabel(Napi::Env, std::optional<std::string> value) {
+  UNIMPLEMENTED();
+}
+
 }  // namespace bindings
 }  // namespace wgpu

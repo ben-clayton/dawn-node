@@ -12,5 +12,13 @@ namespace bindings {
 ////////////////////////////////////////////////////////////////////////////////
 GPUTextureView::GPUTextureView(wgpu::TextureView view) : view_(view) {}
 
+std::optional<std::string> GPUTextureView::getLabel(Napi::Env) {
+  UNIMPLEMENTED();
+}
+
+void GPUTextureView::setLabel(Napi::Env, std::optional<std::string> value) {
+  UNIMPLEMENTED();
+};
+
 }  // namespace bindings
 }  // namespace wgpu

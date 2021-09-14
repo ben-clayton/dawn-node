@@ -106,5 +106,11 @@ void GPUQueue::copyExternalImageToTexture(
   UNIMPLEMENTED();
 }
 
+std::optional<std::string> GPUQueue::getLabel(Napi::Env) { UNIMPLEMENTED(); }
+
+void GPUQueue::setLabel(Napi::Env, std::optional<std::string> value) {
+  UNIMPLEMENTED();
+}
+
 }  // namespace bindings
 }  // namespace wgpu

@@ -54,7 +54,8 @@
         "typeinfo": "cpp",
         "regex": "cpp",
         "iostream": "cpp",
-        "future": "cpp"
+        "future": "cpp",
+        "ratio": "cpp"
     },
     "cSpell.words": [
         "napi",

@@ -17,6 +17,9 @@ class GPUPipelineLayout : public interop::GPUPipelineLayout {
 
   operator wgpu::PipelineLayout &() { return layout_; }
 
+  std::optional<std::string> getLabel(Napi::Env) override;
+  void setLabel(Napi::Env, std::optional<std::string> value) override;
+
  private:
   wgpu::PipelineLayout layout_;
 };

@@ -370,6 +370,12 @@ interop::Promise<std::optional<interop::GPUError>> GPUDevice::popErrorScope(
   return p;
 }
 
+std::optional<std::string> GPUDevice::getLabel(Napi::Env) { UNIMPLEMENTED(); };
+
+void GPUDevice::setLabel(Napi::Env, std::optional<std::string> value) {
+  UNIMPLEMENTED();
+};
+
 interop::Interface<interop::EventHandler> GPUDevice::getOnuncapturederror(
     Napi::Env) {
   UNIMPLEMENTED();

@@ -69,5 +69,11 @@ void GPUBuffer::unmap(Napi::Env) { buffer_.Unmap(); }
 
 void GPUBuffer::destroy(Napi::Env) { buffer_.Release(); }
 
+std::optional<std::string> GPUBuffer::getLabel(Napi::Env) { UNIMPLEMENTED(); }
+
+void GPUBuffer::setLabel(Napi::Env, std::optional<std::string> value) {
+  UNIMPLEMENTED();
+}
+
 }  // namespace bindings
 }  // namespace wgpu

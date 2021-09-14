@@ -48,6 +48,8 @@ class GPUCommandEncoder : public interop::GPUCommandEncoder {
   interop::Interface<interop::GPUCommandBuffer> finish(
       Napi::Env env,
       std::optional<interop::GPUCommandBufferDescriptor> descriptor) override;
+  std::optional<std::string> getLabel(Napi::Env) override;
+  void setLabel(Napi::Env, std::optional<std::string> value) override;
 
  private:
   wgpu::CommandEncoder cmd_enc_;

@@ -145,5 +145,13 @@ interop::Interface<interop::GPUCommandBuffer> GPUCommandEncoder::finish(
       env, cmd_enc_.Finish(&desc));
 }
 
+std::optional<std::string> GPUCommandEncoder::getLabel(Napi::Env) {
+  UNIMPLEMENTED();
+}
+
+void GPUCommandEncoder::setLabel(Napi::Env, std::optional<std::string> value) {
+  UNIMPLEMENTED();
+}
+
 }  // namespace bindings
 }  // namespace wgpu

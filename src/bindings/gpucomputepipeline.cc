@@ -14,5 +14,18 @@ namespace bindings {
 GPUComputePipeline::GPUComputePipeline(wgpu::ComputePipeline pipeline)
     : pipeline_(pipeline) {}
 
+interop::Interface<interop::GPUBindGroupLayout>
+GPUComputePipeline::getBindGroupLayout(Napi::Env, unsigned long index) {
+  UNIMPLEMENTED();
+}
+
+std::optional<std::string> GPUComputePipeline::getLabel(Napi::Env) {
+  UNIMPLEMENTED();
+}
+
+void GPUComputePipeline::setLabel(Napi::Env, std::optional<std::string> value) {
+  UNIMPLEMENTED();
+}
+
 }  // namespace bindings
 }  // namespace wgpu

@@ -50,5 +50,42 @@ void GPUComputePassEncoder::writeTimestamp(
 
 void GPUComputePassEncoder::endPass(Napi::Env) { enc_.EndPass(); }
 
+void GPUComputePassEncoder::setBindGroup(
+    Napi::Env, interop::GPUIndex32 index,
+    interop::Interface<interop::GPUBindGroup> bindGroup,
+    std::optional<std::vector<interop::GPUBufferDynamicOffset>>
+        dynamicOffsets) {
+  UNIMPLEMENTED();
+}
+
+void GPUComputePassEncoder::setBindGroup(
+    Napi::Env, interop::GPUIndex32 index,
+    interop::Interface<interop::GPUBindGroup> bindGroup,
+    interop::Uint32Array dynamicOffsetsData,
+    interop::GPUSize64 dynamicOffsetsDataStart,
+    interop::GPUSize32 dynamicOffsetsDataLength) {
+  UNIMPLEMENTED();
+}
+
+void GPUComputePassEncoder::pushDebugGroup(Napi::Env, std::string groupLabel) {
+  UNIMPLEMENTED();
+}
+
+void GPUComputePassEncoder::popDebugGroup(Napi::Env) { UNIMPLEMENTED(); }
+
+void GPUComputePassEncoder::insertDebugMarker(Napi::Env,
+                                              std::string markerLabel) {
+  UNIMPLEMENTED();
+}
+
+std::optional<std::string> GPUComputePassEncoder::getLabel(Napi::Env) {
+  UNIMPLEMENTED();
+}
+
+void GPUComputePassEncoder::setLabel(Napi::Env,
+                                     std::optional<std::string> value) {
+  UNIMPLEMENTED();
+}
+
 }  // namespace bindings
 }  // namespace wgpu

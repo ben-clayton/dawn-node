@@ -18,5 +18,13 @@ interop::Promise<double> GPUCommandBuffer::getExecutionTime(Napi::Env) {
   UNIMPLEMENTED();
 };
 
+std::optional<std::string> GPUCommandBuffer::getLabel(Napi::Env) {
+  UNIMPLEMENTED();
+}
+
+void GPUCommandBuffer::setLabel(Napi::Env, std::optional<std::string> value) {
+  UNIMPLEMENTED();
+}
+
 }  // namespace bindings
 }  // namespace wgpu

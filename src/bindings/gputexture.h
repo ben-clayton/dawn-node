@@ -19,6 +19,8 @@ class GPUTexture : public interop::GPUTexture {
       Napi::Env,
       std::optional<interop::GPUTextureViewDescriptor> descriptor) override;
   void destroy(Napi::Env) override;
+  std::optional<std::string> getLabel(Napi::Env) override;
+  void setLabel(Napi::Env, std::optional<std::string> value) override;
 
  private:
   wgpu::Texture texture_;

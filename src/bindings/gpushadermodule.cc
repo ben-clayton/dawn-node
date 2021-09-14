@@ -86,5 +86,13 @@ GPUShaderModule::compilationInfo(Napi::Env env) {
   return ctx->promise;
 }
 
+std::optional<std::string> GPUShaderModule::getLabel(Napi::Env) {
+  UNIMPLEMENTED();
+}
+
+void GPUShaderModule::setLabel(Napi::Env, std::optional<std::string> value) {
+  UNIMPLEMENTED();
+}
+
 }  // namespace bindings
 }  // namespace wgpu
