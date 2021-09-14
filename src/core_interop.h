@@ -25,6 +25,7 @@ using Uint16Array = Napi::TypedArrayOf<uint16_t>;
 using Uint32Array = Napi::TypedArrayOf<uint32_t>;
 using Float32Array = Napi::TypedArrayOf<float>;
 using Float64Array = Napi::TypedArrayOf<double>;
+using DataView = Napi::TypedArray;
 
 template <typename T>
 class Interface {
@@ -83,26 +84,45 @@ class Serializer {};
 template <>
 class Serializer<Napi::Object> {
  public:
-  static Napi::Object Unmarshal(Napi::Value);
-  static Napi::Value Marshal(Napi::Env, Napi::Object);
+  static inline Napi::Object Unmarshal(Napi::Value value) {
+    return value.ToObject();
+  }
+  static inline Napi::Value Marshal(Napi::Env, Napi::Object value) {
+    return value;
+  }
 };
 
 template <>
 class Serializer<ArrayBuffer> {
  public:
-  static ArrayBuffer Unmarshal(Napi::Value value) {
+  static inline ArrayBuffer Unmarshal(Napi::Value value) {
     return value.As<ArrayBuffer>();
   };
-  static Napi::Value Marshal(Napi::Env, ArrayBuffer value) { return value; }
+  static inline Napi::Value Marshal(Napi::Env, ArrayBuffer value) {
+    return value;
+  }
+};
+
+template <>
+class Serializer<Napi::TypedArray> {
+ public:
+  static inline Napi::TypedArray Unmarshal(Napi::Value value) {
+    return value.As<Napi::TypedArray>();
+  };
+  static inline Napi::Value Marshal(Napi::Env, ArrayBuffer value) {
+    return value;
+  }
 };
 
 template <typename T>
 class Serializer<Napi::TypedArrayOf<T>> {
  public:
-  static Napi::TypedArrayOf<T> Unmarshal(Napi::Value value) {
+  static inline Napi::TypedArrayOf<T> Unmarshal(Napi::Value value) {
     return value.As<Napi::TypedArrayOf<T>>();
   };
-  static Napi::Value Marshal(Napi::Env, ArrayBuffer value) { return value; }
+  static inline Napi::Value Marshal(Napi::Env, ArrayBuffer value) {
+    return value;
+  }
 };
 
 template <>

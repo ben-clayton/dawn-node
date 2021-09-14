@@ -11,8 +11,6 @@ namespace interop {
 template<typename T>
 using FrozenArray = std::vector<T>;
 
-using DataView = std::vector<uint8_t>;
-
 using Object = Napi::Object;
 
 Napi::Object InitWebGPUInterfaces(Napi::Env env, Napi::Object exports);

@@ -45,16 +45,10 @@ void GPUCommandEncoder::copyBufferToTexture(
     Napi::Env env, interop::GPUImageCopyBuffer source,
     interop::GPUImageCopyTexture destination, interop::GPUExtent3D copySize) {
   wgpu::ImageCopyBuffer src{};
-  src.buffer = *source.buffer.As<GPUBuffer>();
-  src.layout.offset = source.offset;
-  src.layout.bytesPerRow = source.bytesPerRow;
-  src.layout.rowsPerImage = source.rowsPerImage;
   wgpu::ImageCopyTexture dst{};
-  dst.texture = *destination.texture.As<GPUTexture>();
-  dst.mipLevel = destination.mipLevel;
   wgpu::Extent3D size{};
-  if (!Convert(dst.origin, destination.origin) ||  //
-      !Convert(dst.aspect, destination.aspect) ||  //
+  if (!Convert(src, source) ||       //
+      !Convert(dst, destination) ||  //
       !Convert(size, copySize)) {
     Napi::Error::New(env, "invalid argument").ThrowAsJavaScriptException();
     return;
@@ -63,9 +57,18 @@ void GPUCommandEncoder::copyBufferToTexture(
 }
 
 void GPUCommandEncoder::copyTextureToBuffer(
-    Napi::Env, interop::GPUImageCopyTexture source,
+    Napi::Env env, interop::GPUImageCopyTexture source,
     interop::GPUImageCopyBuffer destination, interop::GPUExtent3D copySize) {
-  UNIMPLEMENTED();
+  wgpu::ImageCopyTexture src{};
+  wgpu::ImageCopyBuffer dst{};
+  wgpu::Extent3D size{};
+  if (!Convert(src, source) ||       //
+      !Convert(dst, destination) ||  //
+      !Convert(size, copySize)) {
+    Napi::Error::New(env, "invalid argument").ThrowAsJavaScriptException();
+    return;
+  }
+  cmd_enc_.CopyTextureToBuffer(&src, &dst, &size);
 }
 
 void GPUCommandEncoder::copyTextureToTexture(

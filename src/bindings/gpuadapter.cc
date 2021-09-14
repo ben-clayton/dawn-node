@@ -16,8 +16,9 @@ GPUAdapter::GPUAdapter(dawn_native::Adapter a) : adapter_(a) {}
 std::string GPUAdapter::getName(Napi::Env) { return "dawn-adapter"; }
 
 interop::Interface<interop::GPUSupportedFeatures> GPUAdapter::getFeatures(
-    Napi::Env) {
-  UNIMPLEMENTED();
+    Napi::Env env) {
+  class Features : public interop::GPUSupportedFeatures {};
+  return interop::GPUSupportedFeatures::Create<Features>(env);
 }
 
 interop::Interface<interop::GPUSupportedLimits> GPUAdapter::getLimits(

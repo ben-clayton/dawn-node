@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+#include "src/bindings/convert.h"
+#include "src/bindings/gpubuffer.h"
 #include "src/bindings/gpucommandbuffer.h"
 #include "src/bindings/gpudevice.h"
 #include "src/utils/debug.h"
@@ -35,7 +37,7 @@ interop::Promise<void> GPUQueue::onSubmittedWorkDone(Napi::Env env) {
 
   device_->BeginAsync();
   queue_.OnSubmittedWorkDone(
-      1,  // TODO: What should this value be?
+      0,
       [](WGPUQueueWorkDoneStatus status, void* userdata) {
         auto* c = static_cast<Context*>(userdata);
         if (status !=
@@ -52,20 +54,49 @@ interop::Promise<void> GPUQueue::onSubmittedWorkDone(Napi::Env env) {
   return ctx->promise;
 }
 
-void GPUQueue::writeBuffer(Napi::Env,
+void GPUQueue::writeBuffer(Napi::Env env,
                            interop::Interface<interop::GPUBuffer> buffer,
                            interop::GPUSize64 bufferOffset,
                            interop::BufferSource data,
                            std::optional<interop::GPUSize64> dataOffset,
                            std::optional<interop::GPUSize64> size) {
-  UNIMPLEMENTED();
+  wgpu::Buffer buf = *buffer.As<GPUBuffer>();
+  BufferSource src{};
+  if (!Convert(src, data)) {
+    Napi::Error::New(env, "invalid argument").ThrowAsJavaScriptException();
+    return;
+  }
+
+  // TODO: Bounds check
+  if (dataOffset.has_value()) {
+    src.data = reinterpret_cast<uint8_t*>(src.data) + dataOffset.value();
+    src.size -= dataOffset.value();
+  }
+  if (size.has_value()) {
+    src.size = size.value();
+  }
+
+  queue_.WriteBuffer(buf, bufferOffset, src.data, src.size);
 }
 
-void GPUQueue::writeTexture(Napi::Env, interop::GPUImageCopyTexture destination,
+void GPUQueue::writeTexture(Napi::Env env,
+                            interop::GPUImageCopyTexture destination,
                             interop::BufferSource data,
                             interop::GPUImageDataLayout dataLayout,
                             interop::GPUExtent3D size) {
-  UNIMPLEMENTED();
+  wgpu::ImageCopyTexture dst{};
+  BufferSource src{};
+  wgpu::TextureDataLayout layout{};
+  wgpu::Extent3D sz{};
+  if (!Convert(dst, destination) ||    //
+      !Convert(src, data) ||           //
+      !Convert(layout, dataLayout) ||  //
+      !Convert(sz, size)) {
+    Napi::Error::New(env, "invalid argument").ThrowAsJavaScriptException();
+    return;
+  }
+
+  queue_.WriteTexture(&dst, src.data, src.size, &layout, &sz);
 }
 
 void GPUQueue::copyExternalImageToTexture(

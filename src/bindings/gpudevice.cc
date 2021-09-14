@@ -99,8 +99,9 @@ void GPUDevice::EndAsync() {
 }
 
 interop::Interface<interop::GPUSupportedFeatures> GPUDevice::getFeatures(
-    Napi::Env) {
-  UNIMPLEMENTED();
+    Napi::Env env) {
+  class Features : public interop::GPUSupportedFeatures {};
+  return interop::GPUSupportedFeatures::Create<Features>(env);
 }
 
 interop::Interface<interop::GPUSupportedLimits> GPUDevice::getLimits(
@@ -135,11 +136,11 @@ interop::Interface<interop::GPUTexture> GPUDevice::createTexture(
   desc.label = descriptor.label.c_str();
   desc.usage = static_cast<wgpu::TextureUsage>(descriptor.usage);
   desc.dimension = static_cast<wgpu::TextureDimension>(descriptor.dimension);
-  if (!Convert(desc.size, descriptor.size)) {
+  if (!Convert(desc.size, descriptor.size) ||  //
+      !Convert(desc.format, descriptor.format)) {
     Napi::Error::New(env, "invalid argument").ThrowAsJavaScriptException();
     return {};
   }
-  desc.format = static_cast<wgpu::TextureFormat>(descriptor.format);
   desc.mipLevelCount = descriptor.mipLevelCount;
   desc.sampleCount = descriptor.sampleCount;
   return interop::GPUTexture::Create<GPUTexture>(env,
