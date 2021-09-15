@@ -351,6 +351,21 @@ inline Napi::Value Marshal(Napi::Env env, T&& value) {
       env, std::forward<T>(value));
 }
 
+template <typename TUPLE_ARGS, int BASE_INDEX = 0>
+inline bool UnmarshalArgs(const Napi::CallbackInfo& info, TUPLE_ARGS& args) {
+  if constexpr (BASE_INDEX < std::tuple_size_v<TUPLE_ARGS>) {
+    using T = std::tuple_element_t<BASE_INDEX, TUPLE_ARGS>;
+    try {
+      std::get<BASE_INDEX>(args) = Unmarshal<T>(info.Env(), info[BASE_INDEX]);
+    } catch (Napi::Error) {
+      return false;
+    }
+    return UnmarshalArgs<TUPLE_ARGS, BASE_INDEX + 1>(info, args);
+  } else {
+    return true;
+  }
+}
+
 }  // namespace interop
 }  // namespace wgpu
 
