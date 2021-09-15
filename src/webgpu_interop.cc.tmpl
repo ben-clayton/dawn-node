@@ -4,6 +4,8 @@
 
 #include <unordered_map>
 
+#include "src/utils/debug.h"
+
 namespace wgpu {
 namespace interop {
 
@@ -49,6 +51,16 @@ Napi::Value Serializer<{{$.Name}}>::Marshal(Napi::Env env, {{$.Name}} value) {
   auto object = Napi::Object::New(env);
 {{- template "MarshalDictionaryMembers" $}}
   return object;
+}
+
+std::ostream& operator<<(std::ostream& o, const {{$.Name}}& dict) {
+    o << "{{$.Name}} {";
+{{-    range $i, $m := $.Members}}
+    o << {{if $i}}", "{{else}}" "{{end}} << "{{$m.Name}}: ";
+    Write(o, dict.{{$m.Name}});
+{{-    end          }}
+    o << "}" << std::endl;
+    return o;
 }
 {{ end}}
 
@@ -158,6 +170,10 @@ Wrappers* Wrappers::instance = nullptr;
 {{-          end}}
 {{-        end}}> args;
         if (UnmarshalArgs(info, args)) {
+          {{/* indent */}}LOG(
+{{-        range $i, $p := $o.Parameters}}
+{{-          if $i}}, ", {{$p.Name}}: "{{else}}"{{$p.Name}}: "{{end}}, std::get<{{$i}}>(args)
+{{-        end}});
           {{/* indent */}}
 {{-      if not (IsUndefinedType $o.Type) }}auto result = {{end -}}
           impl->{{$o.Name}}(info.Env(){{range $i, $_ := $o.Parameters}}, std::get<{{$i}}>(args){{end}});
@@ -228,4 +244,15 @@ Napi::Value Serializer<{{$.Name}}>::Marshal(Napi::Env env, {{$.Name}} value) {
   }
   return env.Undefined();
 }
-{{ end}}
+
+std::ostream& operator<<(std::ostream& o, {{$.Name}} value) {
+  switch (value) {
+{{-  range $e := $.Values}}
+    case {{$.Name}}::{{EnumEntryName $e.Value}}:
+      return o << {{$e.Value}};
+{{-  end}}
+  }
+  return o << "undefined<{{$.Name}}>";
+}
+
+{{end}}

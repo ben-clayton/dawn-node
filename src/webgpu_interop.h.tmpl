@@ -47,6 +47,8 @@ public:
   static {{$.Name}} Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, {{$.Name}});
 };
+
+std::ostream& operator<<(std::ostream& o, const {{$.Name}}& desc);
 {{ end}}
 
 {{- /**********************************************************************/ -}}
@@ -99,6 +101,8 @@ public:
   static {{$.Name}} Unmarshal(Napi::Env, Napi::Value);
   static Napi::Value Marshal(Napi::Env, {{$.Name}});
 };
+
+std::ostream& operator<<(std::ostream& o, {{$.Name}});
 {{ end}}
 
 {{- /**********************************************************************/ -}}
