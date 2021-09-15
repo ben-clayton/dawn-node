@@ -152,7 +152,7 @@ void GPURenderPassEncoder::drawIndexed(
   Converter conv(env);
 
   uint32_t idx_cnt = 0;
-  uint32_t ins_cnt = 0;
+  uint32_t ins_cnt = 1;
   uint32_t first_idx = 0;
   int32_t base = 0;
   uint32_t first_inst = 0;

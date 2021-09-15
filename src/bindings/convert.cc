@@ -4,6 +4,7 @@
 #include "src/bindings/gpushadermodule.h"
 #include "src/bindings/gputexture.h"
 #include "src/bindings/gputextureview.h"
+#include "src/utils/debug.h"
 
 namespace wgpu {
 namespace bindings {
@@ -542,8 +543,7 @@ bool Converter::Convert(wgpu::DepthStencilState& out,
 
 bool Converter::Convert(wgpu::MultisampleState& out,
                         const interop::GPUMultisampleState& in) {
-  out = {};
-  return true;
+  UNIMPLEMENTED();
 }
 
 bool Converter::Convert(wgpu::FragmentState& out,
@@ -889,10 +889,10 @@ bool Converter::Convert(wgpu::RenderPassColorAttachment& out,
     return false;
   }
 
+  // TODO: out.attachment?
   return Convert(out.view, in.view) &&
          Convert(out.resolveTarget, in.resolveTarget) &&
-         Convert(out.storeOp, in.storeOp) &&
-         Convert(out.attachment, in.resolveTarget);
+         Convert(out.storeOp, in.storeOp);
 }
 
 bool Converter::Convert(
