@@ -9,8 +9,6 @@
 namespace wgpu {
 namespace bindings {
 
-class GPUDevice;
-
 class GPUBindGroupLayout : public interop::GPUBindGroupLayout {
  public:
   GPUBindGroupLayout(wgpu::BindGroupLayout layout);

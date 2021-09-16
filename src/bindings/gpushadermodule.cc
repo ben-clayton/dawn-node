@@ -1,6 +1,5 @@
 #include "src/bindings/gpushadermodule.h"
 
-#include "src/bindings/gpudevice.h"
 #include "src/utils/debug.h"
 
 namespace wgpu {
@@ -9,8 +8,8 @@ namespace bindings {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUShaderModule
 ////////////////////////////////////////////////////////////////////////////////
-GPUShaderModule::GPUShaderModule(wgpu::ShaderModule shader, GPUDevice* device)
-    : shader_(shader), device_(device) {}
+GPUShaderModule::GPUShaderModule(wgpu::ShaderModule shader, AsyncRunner async)
+    : shader_(shader), async_(async) {}
 
 interop::Promise<interop::Interface<interop::GPUCompilationInfo>>
 GPUShaderModule::compilationInfo(Napi::Env env) {
@@ -69,11 +68,10 @@ GPUShaderModule::compilationInfo(Napi::Env env) {
   struct Context {
     Napi::Env env;
     Promise promise;
-    GPUDevice* device;
+    AsyncTask task;
   };
-  auto ctx = new Context{env, env, device_};
+  auto ctx = new Context{env, env, async_};
 
-  device_->BeginAsync();
   shader_.GetCompilationInfo(
       [](WGPUCompilationInfoRequestStatus status,
          WGPUCompilationInfo const* compilationInfo, void* userdata) {
@@ -90,7 +88,6 @@ GPUShaderModule::compilationInfo(Napi::Env env) {
         c->promise.Resolve(
             interop::GPUCompilationInfo::Create<GPUCompilationInfo>(
                 c->env, c->env, std::move(messages)));
-        c->device->EndAsync();
         delete c;
       },
       ctx);

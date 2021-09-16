@@ -5,7 +5,6 @@
 #include "src/bindings/convert.h"
 #include "src/bindings/gpubuffer.h"
 #include "src/bindings/gpucommandbuffer.h"
-#include "src/bindings/gpudevice.h"
 #include "src/utils/debug.h"
 
 namespace wgpu {
@@ -14,8 +13,8 @@ namespace bindings {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUQueue
 ////////////////////////////////////////////////////////////////////////////////
-GPUQueue::GPUQueue(wgpu::Queue queue, GPUDevice* device)
-    : queue_(queue), device_(device) {}
+GPUQueue::GPUQueue(wgpu::Queue queue, AsyncRunner async)
+    : queue_(queue), async_(async) {}
 
 void GPUQueue::submit(
     Napi::Env,
@@ -31,11 +30,10 @@ interop::Promise<void> GPUQueue::onSubmittedWorkDone(Napi::Env env) {
   struct Context {
     Napi::Env env;
     interop::Promise<void> promise;
-    GPUDevice* device;
+    AsyncTask task;
   };
-  auto ctx = new Context{env, interop::Promise<void>(env), device_};
+  auto ctx = new Context{env, interop::Promise<void>(env), async_};
 
-  device_->BeginAsync();
   queue_.OnSubmittedWorkDone(
       0,
       [](WGPUQueueWorkDoneStatus status, void* userdata) {
@@ -46,7 +44,6 @@ interop::Promise<void> GPUQueue::onSubmittedWorkDone(Napi::Env env) {
               .ThrowAsJavaScriptException();
         }
         c->promise.Resolve();
-        c->device->EndAsync();
         delete c;
       },
       ctx);

@@ -1,7 +1,7 @@
 #include "src/bindings/gpubuffer.h"
 
 #include "src/bindings/convert.h"
-#include "src/bindings/gpudevice.h"
+#include "src/bindings/errors.h"
 #include "src/utils/debug.h"
 
 namespace wgpu {
@@ -11,8 +11,8 @@ namespace bindings {
 // wgpu::bindings::GPUBuffer
 ////////////////////////////////////////////////////////////////////////////////
 GPUBuffer::GPUBuffer(wgpu::Buffer buffer, wgpu::BufferDescriptor desc,
-                     GPUDevice* device)
-    : buffer_(buffer), desc_(desc), device_(device) {}
+                     wgpu::Device device, AsyncRunner async)
+    : buffer_(buffer), desc_(desc), device_(device), async_(async) {}
 
 interop::Promise<void> GPUBuffer::mapAsync(
     Napi::Env env, interop::GPUMapModeFlags mode,
@@ -26,22 +26,45 @@ interop::Promise<void> GPUBuffer::mapAsync(
 
   // LOG("mode: ", md, ", offset: ", offset, ", size: ", size);
 
+  if (!buffer_) {
+    interop::Promise<void> promise(env);
+    promise.Reject(Errors::OperationError(env));
+    device_.InjectError(wgpu::ErrorType::Validation,
+                        "mapAsync called on destroyed buffer");
+    return promise;
+  }
+
   struct Context {
+    Napi::Env env;
     interop::Promise<void> promise;
-    GPUDevice* device;
+    AsyncTask task;
   };
-  auto ctx = new Context{interop::Promise<void>(env), device_};
+  auto ctx = new Context{env, interop::Promise<void>(env), async_};
 
   uint64_t o = offset.has_value() ? offset.value() : 0;
   uint64_t s = size.has_value() ? size.value() : (desc_.size - o);
 
-  device_->BeginAsync();
   buffer_.MapAsync(
       md, o, s,
       [](WGPUBufferMapAsyncStatus status, void* userdata) {
         auto* c = static_cast<Context*>(userdata);
-        c->promise.Resolve();
-        c->device->EndAsync();
+        switch (status) {
+          case WGPUBufferMapAsyncStatus::WGPUBufferMapAsyncStatus_Success:
+            c->promise.Resolve();
+            break;
+          case WGPUBufferMapAsyncStatus::WGPUBufferMapAsyncStatus_Error:
+            c->promise.Reject(Errors::OperationError(c->env));
+            break;
+          case WGPUBufferMapAsyncStatus::WGPUBufferMapAsyncStatus_Unknown:
+          case WGPUBufferMapAsyncStatus::WGPUBufferMapAsyncStatus_DeviceLost:
+          case WGPUBufferMapAsyncStatus::
+              WGPUBufferMapAsyncStatus_DestroyedBeforeCallback:
+          case WGPUBufferMapAsyncStatus::
+              WGPUBufferMapAsyncStatus_UnmappedBeforeCallback:
+            c->promise.Reject(Errors::UnknownError(c->env));
+            break;
+        }
+
         delete c;
       },
       ctx);

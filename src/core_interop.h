@@ -39,7 +39,9 @@ class Interface {
  public:
   inline Interface() {}
   inline Interface(Napi::Object o) : object(o) {}
+
   inline operator napi_value() const { return object; }
+  inline operator Napi::Object() const { return object; }
 
   inline T* operator->() const { return T::Unwrap(object); }
   inline T* operator*() const { return T::Unwrap(object); }
@@ -80,6 +82,10 @@ class Promise<void> {
   inline Napi::Value Value() const { return deferred.Promise(); }
 
   void Resolve() const { deferred.Resolve(deferred.Env().Undefined()); }
+  void Reject(Napi::Object obj) const { deferred.Reject(obj); }
+  void Reject(const char* err) const {
+    Reject(Napi::Error::New(deferred.Env(), err).Value());
+  }
 
  private:
   Napi::Promise::Deferred deferred;

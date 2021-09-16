@@ -56,7 +56,9 @@ class ValidationError : public interop::GPUValidationError {
 // wgpu::bindings::GPUDevice
 ////////////////////////////////////////////////////////////////////////////////
 GPUDevice::GPUDevice(Napi::Env env, wgpu::Device device)
-    : env_(env), device_(device) {
+    : env_(env),
+      device_(device),
+      async_(std::make_shared<AsyncRunnerState>(env, device)) {
   device.SetLoggingCallback(
       [](WGPULoggingType type, char const* message, void* userdata) {
         std::cout << type << ": " << message << std::endl;
@@ -82,33 +84,6 @@ GPUDevice::GPUDevice(Napi::Env env, wgpu::Device device)
 
 GPUDevice::~GPUDevice() { LOG("~GPUDevice()"); }
 
-void GPUDevice::BeginAsync() {
-  if (asyncs_in_flight_++ == 0) {
-    QueueTick();
-  }
-}
-
-void GPUDevice::QueueTick() {
-  env_.Global()
-      .Get("setImmediate")
-      .As<Napi::Function>()
-      .Call({
-          // TODO: Create once, reuse.
-          Napi::Function::New(env_,
-                              [this](const Napi::CallbackInfo&) {
-                                if (asyncs_in_flight_ > 0) {
-                                  device_.Tick();
-                                  QueueTick();
-                                }
-                              }),
-      });
-}
-
-void GPUDevice::EndAsync() {
-  assert(asyncs_in_flight_ > 0);
-  asyncs_in_flight_--;
-}
-
 interop::Interface<interop::GPUSupportedFeatures> GPUDevice::getFeatures(
     Napi::Env env) {
   class Features : public interop::GPUSupportedFeatures {};
@@ -122,7 +97,7 @@ interop::Interface<interop::GPUSupportedLimits> GPUDevice::getLimits(
 
 interop::Interface<interop::GPUQueue> GPUDevice::getQueue(Napi::Env env) {
   // TODO: Should probably return the same Queue JS object.
-  return interop::GPUQueue::Create<GPUQueue>(env, device_.GetQueue(), this);
+  return interop::GPUQueue::Create<GPUQueue>(env, device_.GetQueue(), async_);
 }
 
 void GPUDevice::destroy(Napi::Env) { device_.Release(); }
@@ -141,7 +116,7 @@ interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(
   //  LOG("label: ", desc.label, ", mappedAtCreation: ", desc.mappedAtCreation,
   //      ", size: ", desc.size, ", usage: ", desc.usage);
   return interop::GPUBuffer::Create<GPUBuffer>(env, device_.CreateBuffer(&desc),
-                                               desc, this);
+                                               desc, device_, async_);
 }
 
 interop::Interface<interop::GPUTexture> GPUDevice::createTexture(
@@ -252,7 +227,7 @@ interop::Interface<interop::GPUShaderModule> GPUDevice::createShaderModule(
   sm_desc.nextInChain = &wgsl_desc;
 
   return interop::GPUShaderModule::Create<GPUShaderModule>(
-      env, device_.CreateShaderModule(&sm_desc), this);
+      env, device_.CreateShaderModule(&sm_desc), async_);
 }
 
 interop::Interface<interop::GPUComputePipeline>
@@ -393,17 +368,16 @@ interop::Promise<std::optional<interop::GPUError>> GPUDevice::popErrorScope(
     Napi::Env env) {
   using Promise = interop::Promise<std::optional<interop::GPUError>>;
   struct Context {
-    GPUDevice* device;
+    Napi::Env env;
     Promise promise;
+    AsyncTask task;
   };
-  auto* ctx = new Context{this, env};
+  auto* ctx = new Context{env, env, async_};
 
-  BeginAsync();
   bool ok = device_.PopErrorScope(
       [](WGPUErrorType type, char const* message, void* userdata) {
         auto* c = static_cast<Context*>(userdata);
-        c->device->EndAsync();
-        auto env = c->device->env_;
+        auto env = c->env;
         switch (type) {
           case WGPUErrorType::WGPUErrorType_NoError:
             c->promise.Resolve({});
@@ -431,7 +405,6 @@ interop::Promise<std::optional<interop::GPUError>> GPUDevice::popErrorScope(
     return ctx->promise;
   }
 
-  EndAsync();
   delete ctx;
   Promise p(env);
   p.Resolve(interop::GPUValidationError::Create<ValidationError>(

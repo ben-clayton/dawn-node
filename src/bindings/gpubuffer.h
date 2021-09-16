@@ -4,17 +4,16 @@
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
 #include "napi.h"
+#include "src/bindings/async_runner.h"
 #include "webgpu_interop.h"
 
 namespace wgpu {
 namespace bindings {
 
-class GPUDevice;
-
 class GPUBuffer : public interop::GPUBuffer {
  public:
   GPUBuffer(wgpu::Buffer buffer, wgpu::BufferDescriptor desc,
-            GPUDevice* device);
+            wgpu::Device device, AsyncRunner async);
 
   operator wgpu::Buffer() const { return buffer_; }
   const wgpu::BufferDescriptor& Desc() const { return desc_; }
@@ -34,7 +33,8 @@ class GPUBuffer : public interop::GPUBuffer {
  private:
   wgpu::Buffer buffer_;
   wgpu::BufferDescriptor const desc_;
-  GPUDevice* device_;
+  wgpu::Device const device_;
+  AsyncRunner async_;
   std::vector<Napi::Reference<interop::ArrayBuffer>> mapped_;
 };
 

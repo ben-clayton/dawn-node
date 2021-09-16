@@ -84,8 +84,12 @@ set(WEBIDL_SRC ${CMAKE_CURRENT_SOURCE_DIR}/third_party/webidl-napi)
 
 include_directories(${CMAKE_JS_INC})
 set(SRC_FILES
+    "src/bindings/async_runner.cc"
+    "src/bindings/async_runner.h"
     "src/bindings/convert.cc"
     "src/bindings/convert.h"
+    "src/bindings/errors.cc"
+    "src/bindings/errors.h"
     "src/bindings/gpu.cc"
     "src/bindings/gpu.h"
     "src/bindings/gpuadapter.cc"

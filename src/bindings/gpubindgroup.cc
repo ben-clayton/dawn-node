@@ -1,6 +1,5 @@
 #include "src/bindings/gpubindgroup.h"
 
-#include "src/bindings/gpudevice.h"
 #include "src/utils/debug.h"
 
 namespace wgpu {

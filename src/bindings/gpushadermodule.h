@@ -4,16 +4,15 @@
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
 #include "napi.h"
+#include "src/bindings/async_runner.h"
 #include "webgpu_interop.h"
 
 namespace wgpu {
 namespace bindings {
 
-class GPUDevice;
-
 class GPUShaderModule : public interop::GPUShaderModule {
  public:
-  GPUShaderModule(wgpu::ShaderModule shader, GPUDevice* device);
+  GPUShaderModule(wgpu::ShaderModule shader, AsyncRunner async);
 
   operator wgpu::ShaderModule() const { return shader_; }
 
@@ -24,7 +23,7 @@ class GPUShaderModule : public interop::GPUShaderModule {
 
  private:
   wgpu::ShaderModule shader_;
-  GPUDevice* const device_;
+  AsyncRunner async_;
 };
 
 }  // namespace bindings

@@ -4,16 +4,15 @@
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
 #include "napi.h"
+#include "src/bindings/async_runner.h"
 #include "webgpu_interop.h"
 
 namespace wgpu {
 namespace bindings {
 
-class GPUDevice;
-
 class GPUQueue : public interop::GPUQueue {
  public:
-  GPUQueue(wgpu::Queue queue, GPUDevice* device);
+  GPUQueue(wgpu::Queue queue, AsyncRunner async);
 
   void submit(Napi::Env,
               std::vector<interop::Interface<interop::GPUCommandBuffer>>
@@ -36,7 +35,7 @@ class GPUQueue : public interop::GPUQueue {
 
  private:
   wgpu::Queue queue_;
-  GPUDevice* const device_;
+  AsyncRunner async_;
 };
 
 }  // namespace bindings

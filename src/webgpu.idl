@@ -81,7 +81,7 @@ dictionary AddEventListenerOptions : EventListenerOptions {
 };
 
 typedef (Int8Array or Int16Array or Int32Array or
-         Uint8Array or Uint16Array or Uint32Array or 
+         Uint8Array or Uint16Array or Uint32Array or
          Float32Array or Float64Array or DataView) ArrayBufferView;
 
 typedef (ArrayBufferView or ArrayBuffer) BufferSource;
@@ -105,6 +105,14 @@ interface OffscreenCanvas {
 };
 
 interface EventHandler {};
+
+[Exposed=(Window,Worker), Serializable]
+interface DOMException { // but see below note about ECMAScript binding
+  constructor(optional DOMString message = "", optional DOMString name = "Error");
+  readonly attribute DOMString name;
+  readonly attribute DOMString message;
+  readonly attribute unsigned short code;
+}
 ////////////////////////////////////////////////////////////////////////////////
 
 // **** This file is auto-generated. Do not edit. ****

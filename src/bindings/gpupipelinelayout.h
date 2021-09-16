@@ -9,8 +9,6 @@
 namespace wgpu {
 namespace bindings {
 
-class GPUDevice;
-
 class GPUPipelineLayout : public interop::GPUPipelineLayout {
  public:
   GPUPipelineLayout(wgpu::PipelineLayout layout);

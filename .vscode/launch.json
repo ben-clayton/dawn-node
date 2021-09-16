@@ -28,7 +28,11 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "/home/ben/bin/node/bin/node",
-      "args": ["./test.js", "--verbose", "webgpu:api,*"],
+      "args": [
+        "./test.js",
+        "--verbose",
+        "webgpu:api,validation,buffer,mapping:mapAsync,*"
+      ],
       "stopAtEntry": false,
       "cwd": "/home/ben/src/gpuweb-cts",
       "environment": [],
@@ -47,7 +51,11 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "/home/ben/src/node/out/Debug/node",
-      "args": ["./test.js", "--verbose", "webgpu:api,*"],
+      "args": [
+        "./test.js",
+        "--verbose",
+        "webgpu:api,validation,buffer,mapping:mapAsync,invalidBuffer,*"
+      ],
       "stopAtEntry": false,
       "cwd": "/home/ben/src/gpuweb-cts",
       "environment": [],

@@ -3,6 +3,7 @@
 
 #include "dawn/webgpu_cpp.h"
 #include "napi.h"
+#include "src/bindings/async_runner.h"
 #include "webgpu_interop.h"
 
 namespace wgpu {
@@ -12,9 +13,6 @@ class GPUDevice : public interop::GPUDevice {
  public:
   GPUDevice(Napi::Env env, wgpu::Device device);
   ~GPUDevice();
-
-  void BeginAsync();
-  void EndAsync();
 
   interop::Interface<interop::GPUSupportedFeatures> getFeatures(
       Napi::Env) override;
@@ -84,9 +82,9 @@ class GPUDevice : public interop::GPUDevice {
 
   Napi::Env env_;
   wgpu::Device device_;
+  AsyncRunner async_;
   std::vector<interop::Promise<interop::Interface<interop::GPUDeviceLostInfo>>>
       lost_promises_;
-  int asyncs_in_flight_ = 0;
 };
 
 }  // namespace bindings
