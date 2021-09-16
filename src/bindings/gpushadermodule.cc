@@ -28,7 +28,7 @@ GPUShaderModule::compilationInfo(Napi::Env env) {
         case WGPUCompilationMessageType_Info:
           return interop::GPUCompilationMessageType::kInfo;
         default:
-          return interop::GPUCompilationMessageType::kInvalidEnum;
+          UNIMPLEMENTED();
       }
     }
     unsigned long long getLineNum(Napi::Env) override {

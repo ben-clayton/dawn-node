@@ -51,7 +51,11 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "/home/ben/src/node/out/Debug/node",
-      "args": ["./test.js", "webgpu:api,operation,buffers,map:*"],
+      "args": [
+        "./test.js",
+        "--verbose",
+        "webgpu:api,operation,vertex_state,correctness:overlapping_attributes:*"
+      ],
       "stopAtEntry": false,
       "cwd": "/home/ben/src/gpuweb-cts",
       "environment": [],

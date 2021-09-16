@@ -44,7 +44,7 @@ public:
 template<>
 class Serializer<{{$.Name}}> {
 public:
-  static {{$.Name}} Unmarshal(Napi::Env, Napi::Value);
+  static bool Unmarshal(Napi::Env, Napi::Value, {{$.Name}}&);
   static Napi::Value Marshal(Napi::Env, {{$.Name}});
 };
 
@@ -92,13 +92,12 @@ enum class {{$.Name}} {
 {{-  range $ := $.Values}}
   {{EnumEntryName $.Value}},
 {{-  end}}
-  kInvalidEnum = -1,
 };
 
 template<>
 class Serializer<{{$.Name}}> {
 public:
-  static {{$.Name}} Unmarshal(Napi::Env, Napi::Value);
+  static bool Unmarshal(Napi::Env, Napi::Value, {{$.Name}}&);
   static Napi::Value Marshal(Napi::Env, {{$.Name}});
 };
 
