@@ -130,7 +130,7 @@ bool Converter::Convert(wgpu::ImageCopyBuffer& out,
          Convert(out.layout.rowsPerImage, in.rowsPerImage);
 }
 
-bool Converter::Convert(BufferSource& out, const interop::BufferSource& in) {
+bool Converter::Convert(BufferSource& out, interop::BufferSource in) {
   out = {};
   if (auto* view = std::get_if<interop::ArrayBufferView>(&in)) {
     std::visit(
@@ -142,7 +142,9 @@ bool Converter::Convert(BufferSource& out, const interop::BufferSource& in) {
         *view);
     return true;
   }
-  if (auto* buf = std::get_if<interop::ArrayBuffer>(&in)) {
+  if (auto* arr = std::get_if<interop::ArrayBuffer>(&in)) {
+    out.data = arr->Data();
+    out.size = arr->ByteLength();
     return true;
   }
   Napi::Error::New(env, "invalid value for BufferSource")
@@ -548,7 +550,9 @@ bool Converter::Convert(wgpu::DepthStencilState& out,
 
 bool Converter::Convert(wgpu::MultisampleState& out,
                         const interop::GPUMultisampleState& in) {
-  UNIMPLEMENTED();
+  out = {};
+  return Convert(out.count, in.count) && Convert(out.mask, in.mask) &&
+         Convert(out.alphaToCoverageEnabled, in.alphaToCoverageEnabled);
 }
 
 bool Converter::Convert(wgpu::FragmentState& out,
@@ -1088,6 +1092,84 @@ bool Converter::Convert(wgpu::StorageTextureAccess& out,
       return true;
   }
   Napi::Error::New(env, "invalid value for GPUStorageTextureAccess")
+      .ThrowAsJavaScriptException();
+  return false;
+}
+
+bool Converter::Convert(wgpu::QueryType& out, const interop::GPUQueryType& in) {
+  out = wgpu::QueryType::Occlusion;
+  switch (in) {
+    case interop::GPUQueryType::kOcclusion:
+      out = wgpu::QueryType::Occlusion;
+      return true;
+    case interop::GPUQueryType::kPipelineStatistics:
+      out = wgpu::QueryType::PipelineStatistics;
+      return true;
+    case interop::GPUQueryType::kTimestamp:
+      out = wgpu::QueryType::Timestamp;
+      return true;
+  }
+  Napi::Error::New(env, "invalid value for GPUQueryType")
+      .ThrowAsJavaScriptException();
+  return false;
+}
+
+bool Converter::Convert(wgpu::PipelineStatisticName& out,
+                        const interop::GPUPipelineStatisticName& in) {
+  out = wgpu::PipelineStatisticName::VertexShaderInvocations;
+  switch (in) {
+    case interop::GPUPipelineStatisticName::kVertexShaderInvocations:
+      out = wgpu::PipelineStatisticName::VertexShaderInvocations;
+      return true;
+    case interop::GPUPipelineStatisticName::kClipperInvocations:
+      out = wgpu::PipelineStatisticName::ClipperInvocations;
+      return true;
+    case interop::GPUPipelineStatisticName::kClipperPrimitivesOut:
+      out = wgpu::PipelineStatisticName::ClipperPrimitivesOut;
+      return true;
+    case interop::GPUPipelineStatisticName::kFragmentShaderInvocations:
+      out = wgpu::PipelineStatisticName::FragmentShaderInvocations;
+      return true;
+    case interop::GPUPipelineStatisticName::kComputeShaderInvocations:
+      out = wgpu::PipelineStatisticName::ComputeShaderInvocations;
+      return true;
+  }
+  Napi::Error::New(env, "invalid value for GPUPipelineStatisticName")
+      .ThrowAsJavaScriptException();
+  return false;
+}
+
+bool Converter::Convert(wgpu::AddressMode& out,
+                        const interop::GPUAddressMode& in) {
+  out = wgpu::AddressMode::Repeat;
+  switch (in) {
+    case interop::GPUAddressMode::kClampToEdge:
+      out = wgpu::AddressMode::ClampToEdge;
+      return true;
+    case interop::GPUAddressMode::kRepeat:
+      out = wgpu::AddressMode::Repeat;
+      return true;
+    case interop::GPUAddressMode::kMirrorRepeat:
+      out = wgpu::AddressMode::MirrorRepeat;
+      return true;
+  }
+  Napi::Error::New(env, "invalid value for GPUAddressMode")
+      .ThrowAsJavaScriptException();
+  return false;
+}
+
+bool Converter::Convert(wgpu::FilterMode& out,
+                        const interop::GPUFilterMode& in) {
+  out = wgpu::FilterMode::Nearest;
+  switch (in) {
+    case interop::GPUFilterMode::kNearest:
+      out = wgpu::FilterMode::Nearest;
+      return true;
+    case interop::GPUFilterMode::kLinear:
+      out = wgpu::FilterMode::Linear;
+      return true;
+  }
+  Napi::Error::New(env, "invalid value for GPUFilterMode")
       .ThrowAsJavaScriptException();
   return false;
 }

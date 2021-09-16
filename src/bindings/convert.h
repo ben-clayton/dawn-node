@@ -27,6 +27,7 @@ DECLARE_IMPL(GPUBindGroupLayout);
 DECLARE_IMPL(GPUBuffer);
 DECLARE_IMPL(GPUPipelineLayout);
 DECLARE_IMPL(GPUQuerySet);
+DECLARE_IMPL(GPURenderBundle);
 DECLARE_IMPL(GPURenderPipeline);
 DECLARE_IMPL(GPUSampler);
 DECLARE_IMPL(GPUShaderModule);
@@ -76,8 +77,7 @@ class Converter {
     size_t size;
   };
 
-  [[nodiscard]] bool Convert(BufferSource& out,
-                             const interop::BufferSource& in);
+  [[nodiscard]] bool Convert(BufferSource& out, interop::BufferSource in);
 
   [[nodiscard]] bool Convert(wgpu::TextureDataLayout& out,
                              const interop::GPUImageDataLayout& in);
@@ -212,6 +212,18 @@ class Converter {
 
   [[nodiscard]] bool Convert(wgpu::StorageTextureAccess& out,
                              const interop::GPUStorageTextureAccess& in);
+
+  [[nodiscard]] bool Convert(wgpu::QueryType& out,
+                             const interop::GPUQueryType& in);
+
+  [[nodiscard]] bool Convert(wgpu::PipelineStatisticName& out,
+                             const interop::GPUPipelineStatisticName& in);
+
+  [[nodiscard]] bool Convert(wgpu::AddressMode& out,
+                             const interop::GPUAddressMode& in);
+
+  [[nodiscard]] bool Convert(wgpu::FilterMode& out,
+                             const interop::GPUFilterMode& in);
 
   inline bool Convert(const char*& out, const std::string& in) {
     out = in.c_str();

@@ -16,7 +16,7 @@ class GPUBuffer : public interop::GPUBuffer {
   GPUBuffer(wgpu::Buffer buffer, wgpu::BufferDescriptor desc,
             GPUDevice* device);
 
-  operator wgpu::Buffer &() { return buffer_; }
+  operator wgpu::Buffer() const { return buffer_; }
   const wgpu::BufferDescriptor& Desc() const { return desc_; }
 
   interop::Promise<void> mapAsync(

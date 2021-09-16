@@ -42,13 +42,25 @@ GPUShaderModule::compilationInfo(Napi::Env env) {
   };
 
   using Messages =
-      interop::FrozenArray<interop::Interface<interop::GPUCompilationMessage>>;
+      std::vector<interop::Interface<interop::GPUCompilationMessage>>;
 
   struct GPUCompilationInfo : public interop::GPUCompilationInfo {
-    Messages messages;
+    std::vector<Napi::ObjectReference> messages;
 
-    GPUCompilationInfo(Messages&& m) : messages(std::move(m)) {}
-    Messages getMessages(Napi::Env) override { return messages; }
+    GPUCompilationInfo(Napi::Env env, Messages msgs) {
+      messages.reserve(msgs.size());
+      for (auto& msg : msgs) {
+        messages.emplace_back(Napi::Persistent(Napi::Object(env, msg)));
+      }
+    }
+    Messages getMessages(Napi::Env) override {
+      Messages out;
+      out.reserve(messages.size());
+      for (auto& msg : messages) {
+        out.emplace_back(msg.Value());
+      }
+      return out;
+    }
   };
 
   using Promise =
@@ -77,7 +89,7 @@ GPUShaderModule::compilationInfo(Napi::Env env) {
 
         c->promise.Resolve(
             interop::GPUCompilationInfo::Create<GPUCompilationInfo>(
-                c->env, std::move(messages)));
+                c->env, c->env, std::move(messages)));
         c->device->EndAsync();
         delete c;
       },

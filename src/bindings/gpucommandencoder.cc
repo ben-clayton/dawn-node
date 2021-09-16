@@ -132,11 +132,27 @@ void GPUCommandEncoder::writeTimestamp(
 }
 
 void GPUCommandEncoder::resolveQuerySet(
-    Napi::Env, interop::Interface<interop::GPUQuerySet> querySet,
+    Napi::Env env, interop::Interface<interop::GPUQuerySet> querySet,
     interop::GPUSize32 firstQuery, interop::GPUSize32 queryCount,
     interop::Interface<interop::GPUBuffer> destination,
     interop::GPUSize64 destinationOffset) {
-  UNIMPLEMENTED();
+  Converter conv(env);
+
+  wgpu::QuerySet q{};
+  uint32_t f = 0;
+  uint32_t c = 0;
+  wgpu::Buffer b{};
+  uint64_t o = 0;
+
+  if (!conv(q, querySet) ||     //
+      !conv(f, firstQuery) ||   //
+      !conv(c, queryCount) ||   //
+      !conv(b, destination) ||  //
+      !conv(o, destinationOffset)) {
+    return;
+  }
+
+  cmd_enc_.ResolveQuerySet(q, f, c, b, o);
 }
 
 interop::Interface<interop::GPUCommandBuffer> GPUCommandEncoder::finish(

@@ -13,7 +13,7 @@ class GPURenderPassEncoder : public interop::GPURenderPassEncoder {
  public:
   GPURenderPassEncoder(wgpu::RenderPassEncoder enc);
 
-  operator wgpu::RenderPassEncoder &() { return enc_; }
+  operator wgpu::RenderPassEncoder() const { return enc_; }
 
   void setViewport(Napi::Env, float x, float y, float width, float height,
                    float minDepth, float maxDepth) override;

@@ -10,9 +10,11 @@
 #include "src/bindings/gpucommandencoder.h"
 #include "src/bindings/gpucomputepipeline.h"
 #include "src/bindings/gpupipelinelayout.h"
+#include "src/bindings/gpuqueryset.h"
 #include "src/bindings/gpuqueue.h"
 #include "src/bindings/gpurenderbundleencoder.h"
 #include "src/bindings/gpurenderpipeline.h"
+#include "src/bindings/gpusampler.h"
 #include "src/bindings/gpushadermodule.h"
 #include "src/bindings/gpusupportedlimits.h"
 #include "src/bindings/gputexture.h"
@@ -161,8 +163,29 @@ interop::Interface<interop::GPUTexture> GPUDevice::createTexture(
 }
 
 interop::Interface<interop::GPUSampler> GPUDevice::createSampler(
-    Napi::Env, std::optional<interop::GPUSamplerDescriptor> descriptor) {
-  UNIMPLEMENTED();
+    Napi::Env env, std::optional<interop::GPUSamplerDescriptor> descriptor) {
+  Converter conv(env);
+
+  if (descriptor.has_value()) {
+    wgpu::SamplerDescriptor desc{};
+    if (!conv(desc.label, descriptor->label) ||                //
+        !conv(desc.addressModeU, descriptor->addressModeU) ||  //
+        !conv(desc.addressModeV, descriptor->addressModeV) ||  //
+        !conv(desc.addressModeW, descriptor->addressModeW) ||  //
+        !conv(desc.magFilter, descriptor->magFilter) ||        //
+        !conv(desc.minFilter, descriptor->minFilter) ||        //
+        !conv(desc.mipmapFilter, descriptor->mipmapFilter) ||  //
+        !conv(desc.lodMinClamp, descriptor->lodMinClamp) ||    //
+        !conv(desc.lodMaxClamp, descriptor->lodMaxClamp) ||    //
+        !conv(desc.compare, descriptor->compare) ||            //
+        !conv(desc.maxAnisotropy, descriptor->maxAnisotropy)) {
+      return {};
+    }
+    return interop::GPUSampler::Create<GPUSampler>(
+        env, device_.CreateSampler(&desc));
+  }
+
+  return interop::GPUSampler::Create<GPUSampler>(env, device_.CreateSampler());
 }
 
 interop::Interface<interop::GPUExternalTexture>
@@ -325,8 +348,20 @@ GPUDevice::createRenderBundleEncoder(
 }
 
 interop::Interface<interop::GPUQuerySet> GPUDevice::createQuerySet(
-    Napi::Env, interop::GPUQuerySetDescriptor descriptor) {
-  UNIMPLEMENTED();
+    Napi::Env env, interop::GPUQuerySetDescriptor descriptor) {
+  Converter conv(env);
+
+  wgpu::QuerySetDescriptor desc{};
+  if (!conv(desc.label, descriptor.label) ||
+      !conv(desc.type, descriptor.type) ||
+      !conv(desc.count, descriptor.count) ||
+      !conv(desc.pipelineStatistics, desc.pipelineStatisticsCount,
+            descriptor.pipelineStatistics)) {
+    return {};
+  }
+
+  return interop::GPUQuerySet::Create<GPUQuerySet>(
+      env, device_.CreateQuerySet(&desc));
 }
 
 interop::Promise<interop::Interface<interop::GPUDeviceLostInfo>>

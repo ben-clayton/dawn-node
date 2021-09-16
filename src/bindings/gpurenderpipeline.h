@@ -13,7 +13,7 @@ class GPURenderPipeline : public interop::GPURenderPipeline {
  public:
   GPURenderPipeline(wgpu::RenderPipeline pipeline);
 
-  operator wgpu::RenderPipeline &() { return pipeline_; }
+  operator wgpu::RenderPipeline() const { return pipeline_; }
 
   interop::Interface<interop::GPUBindGroupLayout> getBindGroupLayout(
       Napi::Env, unsigned long index) override;

@@ -28,11 +28,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "/home/ben/bin/node/bin/node",
-      "args": [
-        "./test.js",
-        "--verbose",
-        "webgpu:api,operation,vertex_state,correctness:overlapping_attributes:*"
-      ],
+      "args": ["./test.js", "--verbose", "webgpu:api,*"],
       "stopAtEntry": false,
       "cwd": "/home/ben/src/gpuweb-cts",
       "environment": [],
@@ -51,11 +47,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "/home/ben/src/node/out/Debug/node",
-      "args": [
-        "./test.js",
-        "--verbose",
-        "webgpu:api,operation,vertex_state,correctness:overlapping_attributes:*"
-      ],
+      "args": ["./test.js", "--verbose", "webgpu:api,*"],
       "stopAtEntry": false,
       "cwd": "/home/ben/src/gpuweb-cts",
       "environment": [],

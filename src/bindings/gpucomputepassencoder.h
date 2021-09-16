@@ -13,7 +13,7 @@ class GPUComputePassEncoder : public interop::GPUComputePassEncoder {
  public:
   GPUComputePassEncoder(wgpu::ComputePassEncoder enc);
 
-  operator wgpu::ComputePassEncoder &() { return enc_; }
+  operator wgpu::ComputePassEncoder() const { return enc_; }
 
   void setPipeline(
       Napi::Env,

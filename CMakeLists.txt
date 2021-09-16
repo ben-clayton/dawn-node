@@ -112,6 +112,8 @@ set(SRC_FILES
     "src/bindings/gpuqueryset.h"
     "src/bindings/gpuqueue.cc"
     "src/bindings/gpuqueue.h"
+    "src/bindings/gpurenderbundle.cc"
+    "src/bindings/gpurenderbundle.h"
     "src/bindings/gpurenderbundleencoder.cc"
     "src/bindings/gpurenderbundleencoder.h"
     "src/bindings/gpurenderpassencoder.cc"

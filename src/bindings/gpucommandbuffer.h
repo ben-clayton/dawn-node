@@ -13,7 +13,7 @@ class GPUCommandBuffer : public interop::GPUCommandBuffer {
  public:
   GPUCommandBuffer(wgpu::CommandBuffer cmd_buf);
 
-  operator wgpu::CommandBuffer &() { return cmd_buf_; }
+  operator wgpu::CommandBuffer() const { return cmd_buf_; }
 
   interop::Promise<double> getExecutionTime(Napi::Env) override;
   std::optional<std::string> getLabel(Napi::Env) override;

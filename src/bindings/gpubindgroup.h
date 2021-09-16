@@ -15,7 +15,7 @@ class GPUBindGroup : public interop::GPUBindGroup {
  public:
   GPUBindGroup(wgpu::BindGroup group);
 
-  operator wgpu::BindGroup &() { return group_; }
+  operator wgpu::BindGroup() const { return group_; }
 
   std::optional<std::string> getLabel(Napi::Env) override;
   void setLabel(Napi::Env, std::optional<std::string> value) override;

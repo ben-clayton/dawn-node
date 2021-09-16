@@ -69,7 +69,9 @@ void GPUQueue::writeBuffer(Napi::Env env,
 
   // TODO: Bounds check
   if (dataOffset.has_value()) {
-    src.data = reinterpret_cast<uint8_t*>(src.data) + dataOffset.value();
+    if (src.data) {
+      src.data = reinterpret_cast<uint8_t*>(src.data) + dataOffset.value();
+    }
     src.size -= dataOffset.value();
   }
   if (size.has_value()) {

@@ -13,7 +13,7 @@ class GPUTexture : public interop::GPUTexture {
  public:
   GPUTexture(wgpu::Texture texture);
 
-  operator wgpu::Texture &() { return texture_; }
+  operator wgpu::Texture() const { return texture_; }
 
   interop::Interface<interop::GPUTextureView> createView(
       Napi::Env,

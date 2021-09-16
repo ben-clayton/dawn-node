@@ -13,7 +13,7 @@ class GPUSampler : public interop::GPUSampler {
  public:
   GPUSampler(wgpu::Sampler sampler);
 
-  operator wgpu::Sampler &() { return sampler_; }
+  operator wgpu::Sampler() const { return sampler_; }
 
   std::optional<std::string> getLabel(Napi::Env) override;
   void setLabel(Napi::Env, std::optional<std::string> value) override;

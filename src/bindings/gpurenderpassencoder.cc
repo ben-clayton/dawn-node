@@ -5,6 +5,7 @@
 #include "src/bindings/convert.h"
 #include "src/bindings/gpubindgroup.h"
 #include "src/bindings/gpubuffer.h"
+#include "src/bindings/gpurenderbundle.h"
 #include "src/bindings/gpurenderpipeline.h"
 #include "src/utils/debug.h"
 
@@ -72,9 +73,17 @@ void GPURenderPassEncoder::writeTimestamp(
 }
 
 void GPURenderPassEncoder::executeBundles(
-    Napi::Env,
-    std::vector<interop::Interface<interop::GPURenderBundle>> bundles) {
-  UNIMPLEMENTED();
+    Napi::Env env,
+    std::vector<interop::Interface<interop::GPURenderBundle>> bundles_in) {
+  Converter conv(env);
+
+  wgpu::RenderBundle* bundles = nullptr;
+  uint32_t bundleCount = 0;
+  if (!conv(bundles, bundleCount, bundles_in)) {
+    return;
+  }
+
+  enc_.ExecuteBundles(bundleCount, bundles);
 }
 
 void GPURenderPassEncoder::endPass(Napi::Env) { enc_.EndPass(); }
@@ -90,18 +99,14 @@ void GPURenderPassEncoder::setBindGroup(
   if (!conv(bg, bindGroup)) {
     return;
   }
-  std::vector<uint32_t> offsets;
+  uint32_t* offsets = nullptr;
+  uint32_t offset_count = 0;
   if (dynamicOffsets.has_value() && dynamicOffsets->size() > 0) {
-    offsets.resize(dynamicOffsets->size());
-    for (size_t i = 0; i < offsets.size(); i++) {
-      if (!conv(offsets[i], dynamicOffsets.value()[i])) {
-        return;
-      }
+    if (!conv(offsets, offset_count, dynamicOffsets.value())) {
+      return;
     }
-    enc_.SetBindGroup(index, bg, offsets.size(), offsets.data());
-  } else {
-    enc_.SetBindGroup(index, bg);
   }
+  enc_.SetBindGroup(index, bg, offset_count, offsets);
 }
 
 void GPURenderPassEncoder::setBindGroup(
@@ -141,17 +146,17 @@ void GPURenderPassEncoder::setIndexBuffer(
     std::optional<interop::GPUSize64> size) {
   Converter conv(env);
 
-  wgpu::Buffer buf{};
-  wgpu::IndexFormat fmt;
-  uint64_t off = 0;
-  uint64_t sz = 0;
-  if (!conv(buf, buffer) ||       //
-      !conv(fmt, indexFormat) ||  //
-      !conv(off, offset) ||       //
-      !conv(sz, size)) {
+  wgpu::Buffer b{};
+  wgpu::IndexFormat f;
+  uint64_t o = 0;
+  uint64_t s = 0;
+  if (!conv(b, buffer) ||       //
+      !conv(f, indexFormat) ||  //
+      !conv(o, offset) ||       //
+      !conv(s, size)) {
     return;
   }
-  enc_.SetIndexBuffer(buf, fmt, off, sz);
+  enc_.SetIndexBuffer(b, f, o, s);
 }
 
 void GPURenderPassEncoder::setVertexBuffer(
@@ -161,16 +166,15 @@ void GPURenderPassEncoder::setVertexBuffer(
     std::optional<interop::GPUSize64> size) {
   Converter conv(env);
 
-  wgpu::Buffer buf{};
-  wgpu::IndexFormat fmt;
-  uint64_t off = 0;
-  uint64_t sz = 0;
-  if (!conv(buf, buffer) ||  //
-      !conv(off, offset) ||  //
-      !conv(sz, size)) {
+  wgpu::Buffer b{};
+  uint64_t o = 0;
+  uint64_t s = 0;
+  if (!conv(b, buffer) ||  //
+      !conv(o, offset) ||  //
+      !conv(s, size)) {
     return;
   }
-  enc_.SetVertexBuffer(slot, buf, off, sz);
+  enc_.SetVertexBuffer(slot, b, o, s);
 }
 
 void GPURenderPassEncoder::draw(
@@ -180,18 +184,18 @@ void GPURenderPassEncoder::draw(
     std::optional<interop::GPUSize32> firstInstance) {
   Converter conv(env);
 
-  uint32_t vert_cnt = 0;
-  uint32_t ins_cnt = 1;
-  uint32_t first_vert = 0;
-  uint32_t first_inst = 0;
-
-  if (!conv(vert_cnt, vertexCount) ||    //
-      !conv(ins_cnt, instanceCount) ||   //
-      !conv(first_vert, firstVertex) ||  //
-      !conv(first_inst, firstInstance)) {
+  uint32_t vc = 0;
+  uint32_t ic = 1;
+  uint32_t fv = 0;
+  uint32_t fi = 0;
+  if (!conv(vc, vertexCount) ||    //
+      !conv(ic, instanceCount) ||  //
+      !conv(fv, firstVertex) ||    //
+      !conv(fi, firstInstance)) {
     return;
   }
-  enc_.Draw(vert_cnt, ins_cnt, first_vert, first_inst);
+
+  enc_.Draw(vc, ic, fv, fi);
 }
 
 void GPURenderPassEncoder::drawIndexed(
@@ -202,32 +206,51 @@ void GPURenderPassEncoder::drawIndexed(
     std::optional<interop::GPUSize32> firstInstance) {
   Converter conv(env);
 
-  uint32_t idx_cnt = 0;
-  uint32_t ins_cnt = 1;
-  uint32_t first_idx = 0;
-  int32_t base = 0;
-  uint32_t first_inst = 0;
+  uint32_t idx_c = 0;
+  uint32_t ins_c = 1;
+  uint32_t f_idx = 0;
+  int32_t bv = 0;
+  uint32_t f_ins = 0;
 
-  if (!conv(idx_cnt, indexCount) ||     //
-      !conv(ins_cnt, instanceCount) ||  //
-      !conv(first_idx, firstIndex) ||   //
-      !conv(base, baseVertex) ||        //
-      !conv(first_inst, firstInstance)) {
+  if (!conv(idx_c, indexCount) ||     //
+      !conv(ins_c, instanceCount) ||  //
+      !conv(f_idx, firstIndex) ||     //
+      !conv(bv, baseVertex) ||        //
+      !conv(f_ins, firstInstance)) {
     return;
   }
-  enc_.DrawIndexed(idx_cnt, ins_cnt, first_idx, base, first_inst);
+
+  enc_.DrawIndexed(idx_c, ins_c, f_idx, bv, f_ins);
 }
 
 void GPURenderPassEncoder::drawIndirect(
-    Napi::Env, interop::Interface<interop::GPUBuffer> indirectBuffer,
+    Napi::Env env, interop::Interface<interop::GPUBuffer> indirectBuffer,
     interop::GPUSize64 indirectOffset) {
-  UNIMPLEMENTED();
+  Converter conv(env);
+
+  wgpu::Buffer b{};
+  uint32_t o = 0;
+
+  if (!conv(b, indirectBuffer) ||  //
+      !conv(o, indirectOffset)) {
+    return;
+  }
+  enc_.DrawIndirect(b, o);
 }
 
 void GPURenderPassEncoder::drawIndexedIndirect(
-    Napi::Env, interop::Interface<interop::GPUBuffer> indirectBuffer,
+    Napi::Env env, interop::Interface<interop::GPUBuffer> indirectBuffer,
     interop::GPUSize64 indirectOffset) {
-  UNIMPLEMENTED();
+  Converter conv(env);
+
+  wgpu::Buffer b{};
+  uint32_t o = 0;
+
+  if (!conv(b, indirectBuffer) ||  //
+      !conv(o, indirectOffset)) {
+    return;
+  }
+  enc_.DrawIndexedIndirect(b, o);
 }
 
 std::optional<std::string> GPURenderPassEncoder::getLabel(Napi::Env) {

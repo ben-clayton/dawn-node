@@ -1,5 +1,5 @@
-#ifndef DAWN_NODE_SRC_BINDINGS_GPUTEXTUREVIEW_H_
-#define DAWN_NODE_SRC_BINDINGS_GPUTEXTUREVIEW_H_
+#ifndef DAWN_NODE_SRC_BINDINGS_GPURENDERBUNDLE_H_
+#define DAWN_NODE_SRC_BINDINGS_GPURENDERBUNDLE_H_
 
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
@@ -9,20 +9,19 @@
 namespace wgpu {
 namespace bindings {
 
-class GPUTextureView : public interop::GPUTextureView {
+class GPURenderBundle : public interop::GPURenderBundle {
  public:
-  GPUTextureView(wgpu::TextureView view);
+  GPURenderBundle(wgpu::RenderBundle bundle);
 
-  operator wgpu::TextureView() const { return view_; }
-
+  operator wgpu::RenderBundle() const { return bundle_; }
   std::optional<std::string> getLabel(Napi::Env) override;
   void setLabel(Napi::Env, std::optional<std::string> value) override;
 
  private:
-  wgpu::TextureView view_;
+  wgpu::RenderBundle bundle_;
 };
 
 }  // namespace bindings
 }  // namespace wgpu
 
-#endif  // DAWN_NODE_SRC_BINDINGS_GPUTEXTUREVIEW_H_
+#endif  // DAWN_NODE_SRC_BINDINGS_GPURENDERBUNDLE_H_

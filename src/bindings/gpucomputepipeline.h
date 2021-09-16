@@ -13,7 +13,7 @@ class GPUComputePipeline : public interop::GPUComputePipeline {
  public:
   GPUComputePipeline(wgpu::ComputePipeline pipeline);
 
-  operator wgpu::ComputePipeline &() { return pipeline_; }
+  operator wgpu::ComputePipeline() const { return pipeline_; }
 
   interop::Interface<interop::GPUBindGroupLayout> getBindGroupLayout(
       Napi::Env, unsigned long index) override;
