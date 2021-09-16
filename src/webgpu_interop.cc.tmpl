@@ -162,7 +162,7 @@ Wrappers* Wrappers::instance = nullptr;
 {{-          end}}
 {{-        end}}> args;
         if (UnmarshalArgs(info, args)) {
-          {{/* indent */}}LOG(
+          {{/* indent */}}INTEROP_LOG(
 {{-        range $i, $p := $o.Parameters}}
 {{-          if $i}}, ", {{$p.Name}}: "{{else}}"{{$p.Name}}: "{{end}}, std::get<{{$i}}>(args)
 {{-        end}});

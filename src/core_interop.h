@@ -13,6 +13,12 @@
 #include "napi.h"
 #include "src/utils/debug.h"
 
+#if 0
+#define INTEROP_LOG(...) LOG(__VA_ARGS__)
+#else
+#define INTEROP_LOG(...)
+#endif
+
 namespace wgpu {
 namespace interop {
 
