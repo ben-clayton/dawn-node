@@ -983,8 +983,16 @@ bool Converter::Convert(wgpu::BindGroupEntry& out,
     return Convert(out.textureView, *res);
   }
   if (auto* res = std::get_if<interop::GPUBufferBinding>(&in.resource)) {
-    return Convert(out.buffer, res->buffer) &&
-           Convert(out.offset, res->offset) && Convert(out.size, res->size);
+    auto buffer = res->buffer.As<GPUBuffer>();
+    if (!buffer || !Convert(out.offset, res->offset) ||
+        !Convert(out.size, res->size)) {
+      return false;
+    }
+    out.buffer = *buffer;
+    if (out.size == 0) {
+      out.size = buffer->Desc().size - out.offset;
+    }
+    return true;
   }
   if (auto* res = std::get_if<interop::Interface<interop::GPUExternalTexture>>(
           &in.resource)) {

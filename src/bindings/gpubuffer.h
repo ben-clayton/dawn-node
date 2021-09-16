@@ -17,6 +17,7 @@ class GPUBuffer : public interop::GPUBuffer {
             GPUDevice* device);
 
   operator wgpu::Buffer &() { return buffer_; }
+  const wgpu::BufferDescriptor& Desc() const { return desc_; }
 
   interop::Promise<void> mapAsync(
       Napi::Env env, interop::GPUMapModeFlags mode,
