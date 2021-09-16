@@ -21,7 +21,7 @@
 	url = https://github.com/KhronosGroup/SPIRV-Headers.git
 [submodule "third_party/node-api-headers"]
 	path = third_party/node-api-headers
-	url = git@github.com:nodejs/node-api-headers.git
+	url = https://github.com/nodejs/node-api-headers.git
 [submodule "third_party/glfw"]
 	path = third_party/glfw
 	url = https://github.com/glfw/glfw.git
