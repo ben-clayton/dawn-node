@@ -13,6 +13,7 @@
 #include "src/bindings/gpuqueue.h"
 #include "src/bindings/gpurenderpipeline.h"
 #include "src/bindings/gpushadermodule.h"
+#include "src/bindings/gpusupportedlimits.h"
 #include "src/bindings/gputexture.h"
 #include "src/utils/debug.h"
 
@@ -111,8 +112,8 @@ interop::Interface<interop::GPUSupportedFeatures> GPUDevice::getFeatures(
 }
 
 interop::Interface<interop::GPUSupportedLimits> GPUDevice::getLimits(
-    Napi::Env) {
-  UNIMPLEMENTED();
+    Napi::Env env) {
+  return interop::GPUSupportedLimits::Create<GPUSupportedLimits>(env);
 }
 
 interop::Interface<interop::GPUQueue> GPUDevice::getQueue(Napi::Env env) {

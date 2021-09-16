@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "src/bindings/gpudevice.h"
+#include "src/bindings/gpusupportedlimits.h"
 #include "src/utils/debug.h"
 
 namespace wgpu {
@@ -22,8 +23,8 @@ interop::Interface<interop::GPUSupportedFeatures> GPUAdapter::getFeatures(
 }
 
 interop::Interface<interop::GPUSupportedLimits> GPUAdapter::getLimits(
-    Napi::Env) {
-  UNIMPLEMENTED();
+    Napi::Env env) {
+  return interop::GPUSupportedLimits::Create<GPUSupportedLimits>(env);
 }
 
 bool GPUAdapter::getIsFallbackAdapter(Napi::Env) { UNIMPLEMENTED(); }

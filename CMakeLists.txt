@@ -120,6 +120,8 @@ set(SRC_FILES
     "src/bindings/gpusampler.h"
     "src/bindings/gpushadermodule.cc"
     "src/bindings/gpushadermodule.h"
+    "src/bindings/gpusupportedlimits.cc"
+    "src/bindings/gpusupportedlimits.h"
     "src/bindings/gputexture.cc"
     "src/bindings/gputexture.h"
     "src/bindings/gputextureview.cc"
