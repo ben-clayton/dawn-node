@@ -24,7 +24,6 @@ GPUCommandEncoder::GPUCommandEncoder(wgpu::CommandEncoder cmd_enc)
 interop::Interface<interop::GPURenderPassEncoder>
 GPUCommandEncoder::beginRenderPass(
     Napi::Env env, interop::GPURenderPassDescriptor descriptor) {
-  wgpu::RenderPassDescriptor desc{};
   Converter conv(env);
 
   std::vector<wgpu::RenderPassColorAttachment> colorAttachments(
@@ -34,6 +33,8 @@ GPUCommandEncoder::beginRenderPass(
       return {};
     }
   }
+
+  wgpu::RenderPassDescriptor desc{};
   desc.colorAttachments = colorAttachments.data();
   desc.colorAttachmentCount = colorAttachments.size();
 
@@ -67,50 +68,67 @@ void GPUCommandEncoder::copyBufferToBuffer(
     interop::GPUSize64 sourceOffset,
     interop::Interface<interop::GPUBuffer> destination,
     interop::GPUSize64 destinationOffset, interop::GPUSize64 size) {
+  Converter conv(env);
+
   wgpu::Buffer src{};
   wgpu::Buffer dst{};
-  Converter conv(env);
   if (!conv(src, source) ||  //
       !conv(dst, destination)) {
     return;
   }
+
   cmd_enc_.CopyBufferToBuffer(src, sourceOffset, dst, destinationOffset, size);
 }
 
 void GPUCommandEncoder::copyBufferToTexture(
     Napi::Env env, interop::GPUImageCopyBuffer source,
     interop::GPUImageCopyTexture destination, interop::GPUExtent3D copySize) {
+  Converter conv(env);
+
   wgpu::ImageCopyBuffer src{};
   wgpu::ImageCopyTexture dst{};
   wgpu::Extent3D size{};
-  Converter conv(env);
   if (!conv(src, source) ||       //
       !conv(dst, destination) ||  //
       !conv(size, copySize)) {
     return;
   }
+
   cmd_enc_.CopyBufferToTexture(&src, &dst, &size);
 }
 
 void GPUCommandEncoder::copyTextureToBuffer(
     Napi::Env env, interop::GPUImageCopyTexture source,
     interop::GPUImageCopyBuffer destination, interop::GPUExtent3D copySize) {
+  Converter conv(env);
+
   wgpu::ImageCopyTexture src{};
   wgpu::ImageCopyBuffer dst{};
   wgpu::Extent3D size{};
-  Converter conv(env);
   if (!conv(src, source) ||       //
       !conv(dst, destination) ||  //
       !conv(size, copySize)) {
     return;
   }
+
   cmd_enc_.CopyTextureToBuffer(&src, &dst, &size);
 }
 
 void GPUCommandEncoder::copyTextureToTexture(
-    Napi::Env, interop::GPUImageCopyTexture source,
+    Napi::Env env, interop::GPUImageCopyTexture source,
     interop::GPUImageCopyTexture destination, interop::GPUExtent3D copySize) {
-  UNIMPLEMENTED();
+  Converter conv(env);
+
+  wgpu::ImageCopyTexture src{};
+  wgpu::ImageCopyTexture dst{};
+  wgpu::Extent3D size{};
+  if (!conv(src, source) ||       //
+      !conv(dst, destination) ||  //
+      !conv(size, copySize)) {
+    return;
+  }
+
+  cmd_enc_.CopyTextureToTexture(&src, &dst, &size);
 }
 
 void GPUCommandEncoder::pushDebugGroup(Napi::Env, std::string groupLabel) {

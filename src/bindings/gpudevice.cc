@@ -125,8 +125,9 @@ void GPUDevice::destroy(Napi::Env) { device_.Release(); }
 
 interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(
     Napi::Env env, interop::GPUBufferDescriptor descriptor) {
-  wgpu::BufferDescriptor desc{};
   Converter conv(env);
+
+  wgpu::BufferDescriptor desc{};
   if (!conv(desc.label, descriptor.label) ||
       !conv(desc.mappedAtCreation, descriptor.mappedAtCreation) ||
       !conv(desc.size, descriptor.size) ||
@@ -141,8 +142,9 @@ interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(
 
 interop::Interface<interop::GPUTexture> GPUDevice::createTexture(
     Napi::Env env, interop::GPUTextureDescriptor descriptor) {
-  wgpu::TextureDescriptor desc{};
   Converter conv(env);
+
+  wgpu::TextureDescriptor desc{};
   if (!conv(desc.label, descriptor.label) ||
       !conv(desc.usage, descriptor.usage) ||                  //
       !conv(desc.size, descriptor.size) ||                    //
@@ -169,14 +171,32 @@ GPUDevice::importExternalTexture(
 
 interop::Interface<interop::GPUBindGroupLayout>
 GPUDevice::createBindGroupLayout(
-    Napi::Env, interop::GPUBindGroupLayoutDescriptor descriptor) {
-  UNIMPLEMENTED();
+    Napi::Env env, interop::GPUBindGroupLayoutDescriptor descriptor) {
+  Converter conv(env);
+
+  wgpu::BindGroupLayoutDescriptor desc{};
+  if (!conv(desc.label, descriptor.label)) {
+    return {};
+  }
+
+  std::vector<wgpu::BindGroupLayoutEntry> entries(descriptor.entries.size());
+  for (size_t i = 0; i < entries.size(); i++) {
+    if (!conv(entries[i], descriptor.entries[i])) {
+      return {};
+    }
+  }
+  desc.entries = entries.data();
+  desc.entryCount = entries.size();
+
+  return interop::GPUBindGroupLayout::Create<GPUBindGroupLayout>(
+      env, device_.CreateBindGroupLayout(&desc));
 }
 
 interop::Interface<interop::GPUPipelineLayout> GPUDevice::createPipelineLayout(
     Napi::Env env, interop::GPUPipelineLayoutDescriptor descriptor) {
-  wgpu::PipelineLayoutDescriptor desc{};
   Converter conv(env);
+
+  wgpu::PipelineLayoutDescriptor desc{};
   if (!conv(desc.label, descriptor.label)) {
     return {};
   }
@@ -195,8 +215,9 @@ interop::Interface<interop::GPUPipelineLayout> GPUDevice::createPipelineLayout(
 
 interop::Interface<interop::GPUBindGroup> GPUDevice::createBindGroup(
     Napi::Env env, interop::GPUBindGroupDescriptor descriptor) {
-  wgpu::BindGroupDescriptor desc{};
   Converter conv(env);
+
+  wgpu::BindGroupDescriptor desc{};
   if (!conv(desc.label, descriptor.label) ||
       !conv(desc.layout, descriptor.layout)) {
     return {};
@@ -237,6 +258,8 @@ interop::Interface<interop::GPUShaderModule> GPUDevice::createShaderModule(
 interop::Interface<interop::GPUComputePipeline>
 GPUDevice::createComputePipeline(
     Napi::Env env, interop::GPUComputePipelineDescriptor descriptor) {
+  Converter conv(env);
+
   wgpu::ComputePipelineDescriptor desc{};
   if (!descriptor.layout.has_value()) {
     Napi::Error::New(env, "missing GPUComputePipelineDescriptor.layout")
@@ -244,20 +267,20 @@ GPUDevice::createComputePipeline(
     return {};
   }
   desc.layout = *descriptor.layout.value().As<GPUPipelineLayout>();
-  Converter conv(env);
   if (!conv(desc.label, descriptor.label) ||
       !conv(desc.computeStage, descriptor.compute)) {
     return {};
   }
+
   return interop::GPUComputePipeline::Create<GPUComputePipeline>(
       env, device_.CreateComputePipeline(&desc));
 }
 
 interop::Interface<interop::GPURenderPipeline> GPUDevice::createRenderPipeline(
     Napi::Env env, interop::GPURenderPipelineDescriptor descriptor) {
-  wgpu::RenderPipelineDescriptor desc{};
   Converter conv(env);
 
+  wgpu::RenderPipelineDescriptor desc{};
   wgpu::DepthStencilState depthStencil{};
   if (descriptor.depthStencil.has_value()) {
     if (!conv(depthStencil, descriptor.depthStencil)) {
@@ -281,6 +304,7 @@ interop::Interface<interop::GPURenderPipeline> GPUDevice::createRenderPipeline(
       !conv(desc.multisample, descriptor.multisample)) {
     return {};
   }
+
   return interop::GPURenderPipeline::Create<GPURenderPipeline>(
       env, device_.CreateRenderPipeline(&desc));
 }

@@ -355,6 +355,12 @@ bool Converter::Convert(wgpu::MapMode& out,
   return true;
 }
 
+bool Converter::Convert(wgpu::ShaderStage& out,
+                        const interop::GPUShaderStageFlags& in) {
+  out = static_cast<wgpu::ShaderStage>(in);
+  return true;
+}
+
 bool Converter::Convert(wgpu::TextureDimension& out,
                         const interop::GPUTextureDimension& in) {
   out = wgpu::TextureDimension::e1D;
@@ -999,6 +1005,117 @@ bool Converter::Convert(wgpu::BindGroupEntry& out,
     UNIMPLEMENTED();
   }
   Napi::Error::New(env, "invalid value for GPUBindGroupEntry.resource")
+      .ThrowAsJavaScriptException();
+  return false;
+}
+
+bool Converter::Convert(wgpu::BindGroupLayoutEntry& out,
+                        const interop::GPUBindGroupLayoutEntry& in) {
+  // TODO in.externalTexture
+  return Convert(out.binding, in.binding) &&
+         Convert(out.visibility, in.visibility) &&
+         Convert(out.buffer, in.buffer) && Convert(out.sampler, in.sampler) &&
+         Convert(out.texture, in.texture) &&
+         Convert(out.storageTexture, in.storageTexture);
+}
+
+bool Converter::Convert(wgpu::BufferBindingLayout& out,
+                        const interop::GPUBufferBindingLayout& in) {
+  return Convert(out.type, in.type) &&
+         Convert(out.hasDynamicOffset, in.hasDynamicOffset) &&
+         Convert(out.minBindingSize, in.minBindingSize);
+}
+
+bool Converter::Convert(wgpu::SamplerBindingLayout& out,
+                        const interop::GPUSamplerBindingLayout& in) {
+  return Convert(out.type, in.type);
+}
+
+bool Converter::Convert(wgpu::TextureBindingLayout& out,
+                        const interop::GPUTextureBindingLayout& in) {
+  return Convert(out.sampleType, in.sampleType) &&
+         Convert(out.viewDimension, in.viewDimension) &&
+         Convert(out.multisampled, in.multisampled);
+}
+
+bool Converter::Convert(wgpu::StorageTextureBindingLayout& out,
+                        const interop::GPUStorageTextureBindingLayout& in) {
+  return Convert(out.access, in.access) && Convert(out.format, in.format) &&
+         Convert(out.viewDimension, in.viewDimension);
+}
+
+bool Converter::Convert(wgpu::BufferBindingType& out,
+                        const interop::GPUBufferBindingType& in) {
+  out = wgpu::BufferBindingType::Undefined;
+  switch (in) {
+    case interop::GPUBufferBindingType::kUniform:
+      out = wgpu::BufferBindingType::Uniform;
+      return true;
+    case interop::GPUBufferBindingType::kStorage:
+      out = wgpu::BufferBindingType::Storage;
+      return true;
+    case interop::GPUBufferBindingType::kReadOnlyStorage:
+      out = wgpu::BufferBindingType::ReadOnlyStorage;
+      return true;
+  }
+  Napi::Error::New(env, "invalid value for GPUBufferBindingType")
+      .ThrowAsJavaScriptException();
+  return false;
+}
+
+bool Converter::Convert(wgpu::TextureSampleType& out,
+                        const interop::GPUTextureSampleType& in) {
+  out = wgpu::TextureSampleType::Undefined;
+  switch (in) {
+    case interop::GPUTextureSampleType::kFloat:
+      out = wgpu::TextureSampleType::Float;
+      return true;
+    case interop::GPUTextureSampleType::kUnfilterableFloat:
+      out = wgpu::TextureSampleType::UnfilterableFloat;
+      return true;
+    case interop::GPUTextureSampleType::kDepth:
+      out = wgpu::TextureSampleType::Depth;
+      return true;
+    case interop::GPUTextureSampleType::kSint:
+      out = wgpu::TextureSampleType::Sint;
+      return true;
+    case interop::GPUTextureSampleType::kUint:
+      out = wgpu::TextureSampleType::Uint;
+      return true;
+  }
+  Napi::Error::New(env, "invalid value for GPUTextureSampleType")
+      .ThrowAsJavaScriptException();
+  return false;
+}
+
+bool Converter::Convert(wgpu::SamplerBindingType& out,
+                        const interop::GPUSamplerBindingType& in) {
+  out = wgpu::SamplerBindingType::Undefined;
+  switch (in) {
+    case interop::GPUSamplerBindingType::kFiltering:
+      out = wgpu::SamplerBindingType::Filtering;
+      return true;
+    case interop::GPUSamplerBindingType::kNonFiltering:
+      out = wgpu::SamplerBindingType::NonFiltering;
+      return true;
+    case interop::GPUSamplerBindingType::kComparison:
+      out = wgpu::SamplerBindingType::Comparison;
+      return true;
+  }
+  Napi::Error::New(env, "invalid value for GPUSamplerBindingType")
+      .ThrowAsJavaScriptException();
+  return false;
+}
+
+bool Converter::Convert(wgpu::StorageTextureAccess& out,
+                        const interop::GPUStorageTextureAccess& in) {
+  out = wgpu::StorageTextureAccess::Undefined;
+  switch (in) {
+    case interop::GPUStorageTextureAccess::kWriteOnly:
+      out = wgpu::StorageTextureAccess::WriteOnly;
+      return true;
+  }
+  Napi::Error::New(env, "invalid value for GPUStorageTextureAccess")
       .ThrowAsJavaScriptException();
   return false;
 }

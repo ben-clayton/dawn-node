@@ -89,6 +89,9 @@ class Converter {
   [[nodiscard]] bool Convert(wgpu::MapMode& out,
                              const interop::GPUMapModeFlags& in);
 
+  [[nodiscard]] bool Convert(wgpu::ShaderStage& out,
+                             const interop::GPUShaderStageFlags& in);
+
   [[nodiscard]] bool Convert(wgpu::TextureDimension& out,
                              const interop::GPUTextureDimension& in);
 
@@ -174,6 +177,33 @@ class Converter {
 
   [[nodiscard]] bool Convert(wgpu::BindGroupEntry& out,
                              const interop::GPUBindGroupEntry& in);
+
+  [[nodiscard]] bool Convert(wgpu::BindGroupLayoutEntry& out,
+                             const interop::GPUBindGroupLayoutEntry& in);
+
+  [[nodiscard]] bool Convert(wgpu::BufferBindingLayout& out,
+                             const interop::GPUBufferBindingLayout& in);
+
+  [[nodiscard]] bool Convert(wgpu::SamplerBindingLayout& out,
+                             const interop::GPUSamplerBindingLayout& in);
+
+  [[nodiscard]] bool Convert(wgpu::TextureBindingLayout& out,
+                             const interop::GPUTextureBindingLayout& in);
+
+  [[nodiscard]] bool Convert(wgpu::StorageTextureBindingLayout& out,
+                             const interop::GPUStorageTextureBindingLayout& in);
+
+  [[nodiscard]] bool Convert(wgpu::BufferBindingType& out,
+                             const interop::GPUBufferBindingType& in);
+
+  [[nodiscard]] bool Convert(wgpu::SamplerBindingType& out,
+                             const interop::GPUSamplerBindingType& in);
+
+  [[nodiscard]] bool Convert(wgpu::TextureSampleType& out,
+                             const interop::GPUTextureSampleType& in);
+
+  [[nodiscard]] bool Convert(wgpu::StorageTextureAccess& out,
+                             const interop::GPUStorageTextureAccess& in);
 
   inline bool Convert(const char*& out, const std::string& in) {
     out = in.c_str();
