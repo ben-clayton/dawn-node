@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "src/bindings/convert.h"
+#include "src/bindings/gpubindgroup.h"
 #include "src/bindings/gpubindgrouplayout.h"
 #include "src/bindings/gpubuffer.h"
 #include "src/bindings/gpucommandbuffer.h"
@@ -181,7 +182,9 @@ interop::Interface<interop::GPUPipelineLayout> GPUDevice::createPipelineLayout(
   std::vector<wgpu::BindGroupLayout> layouts(
       descriptor.bindGroupLayouts.size());
   for (size_t i = 0; i < layouts.size(); i++) {
-    layouts[i] = *descriptor.bindGroupLayouts[i].As<GPUBindGroupLayout>();
+    if (!conv(layouts[i], descriptor.bindGroupLayouts[i])) {
+      return {};
+    }
   }
   desc.bindGroupLayouts = layouts.data();
   desc.bindGroupLayoutCount = layouts.size();
@@ -190,8 +193,25 @@ interop::Interface<interop::GPUPipelineLayout> GPUDevice::createPipelineLayout(
 }
 
 interop::Interface<interop::GPUBindGroup> GPUDevice::createBindGroup(
-    Napi::Env, interop::GPUBindGroupDescriptor descriptor) {
-  UNIMPLEMENTED();
+    Napi::Env env, interop::GPUBindGroupDescriptor descriptor) {
+  wgpu::BindGroupDescriptor desc{};
+  Converter conv(env);
+  if (!conv(desc.label, descriptor.label) ||
+      !conv(desc.layout, descriptor.layout)) {
+    return {};
+  }
+
+  std::vector<wgpu::BindGroupEntry> entries(descriptor.entries.size());
+  for (size_t i = 0; i < entries.size(); i++) {
+    if (!conv(entries[i], descriptor.entries[i])) {
+      return {};
+    }
+  }
+  desc.entries = entries.data();
+  desc.entryCount = entries.size();
+
+  return interop::GPUBindGroup::Create<GPUBindGroup>(
+      env, device_.CreateBindGroup(&desc));
 }
 
 interop::Interface<interop::GPUShaderModule> GPUDevice::createShaderModule(

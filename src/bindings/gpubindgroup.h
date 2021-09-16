@@ -1,5 +1,5 @@
-#ifndef DAWN_NODE_SRC_BINDINGS_GPUBINDGROUPLAYOUT_H_
-#define DAWN_NODE_SRC_BINDINGS_GPUBINDGROUPLAYOUT_H_
+#ifndef DAWN_NODE_SRC_BINDINGS_GPUBINDGROUP_H_
+#define DAWN_NODE_SRC_BINDINGS_GPUBINDGROUP_H_
 
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
@@ -11,20 +11,20 @@ namespace bindings {
 
 class GPUDevice;
 
-class GPUBindGroupLayout : public interop::GPUBindGroupLayout {
+class GPUBindGroup : public interop::GPUBindGroup {
  public:
-  GPUBindGroupLayout(wgpu::BindGroupLayout layout);
+  GPUBindGroup(wgpu::BindGroup group);
 
-  operator wgpu::BindGroupLayout &() { return layout_; }
+  operator wgpu::BindGroup &() { return group_; }
 
   std::optional<std::string> getLabel(Napi::Env) override;
   void setLabel(Napi::Env, std::optional<std::string> value) override;
 
  private:
-  wgpu::BindGroupLayout layout_;
+  wgpu::BindGroup group_;
 };
 
 }  // namespace bindings
 }  // namespace wgpu
 
-#endif  // DAWN_NODE_SRC_BINDINGS_GPUBINDGROUPLAYOUT_H_
+#endif  // DAWN_NODE_SRC_BINDINGS_GPUBINDGROUP_H_

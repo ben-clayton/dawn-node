@@ -1,4 +1,4 @@
-#include "src/bindings/gpubindgrouplayout.h"
+#include "src/bindings/gpubindgroup.h"
 
 #include "src/bindings/gpudevice.h"
 #include "src/utils/debug.h"
@@ -7,16 +7,15 @@ namespace wgpu {
 namespace bindings {
 
 ////////////////////////////////////////////////////////////////////////////////
-// wgpu::bindings::GPUBindGroupLayout
+// wgpu::bindings::GPUBindGroup
 ////////////////////////////////////////////////////////////////////////////////
-GPUBindGroupLayout::GPUBindGroupLayout(wgpu::BindGroupLayout layout)
-    : layout_(layout) {}
+GPUBindGroup::GPUBindGroup(wgpu::BindGroup group) : group_(group) {}
 
-std::optional<std::string> GPUBindGroupLayout::getLabel(Napi::Env) {
+std::optional<std::string> GPUBindGroup::getLabel(Napi::Env) {
   UNIMPLEMENTED();
 }
 
-void GPUBindGroupLayout::setLabel(Napi::Env, std::optional<std::string> value) {
+void GPUBindGroup::setLabel(Napi::Env, std::optional<std::string> value) {
   UNIMPLEMENTED();
 }
 

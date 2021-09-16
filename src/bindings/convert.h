@@ -21,10 +21,13 @@ struct ImplOf {};
     using type = NAME;           \
   }
 
+DECLARE_IMPL(GPUBindGroup);
+DECLARE_IMPL(GPUBindGroupLayout);
 DECLARE_IMPL(GPUBuffer);
 DECLARE_IMPL(GPUPipelineLayout);
 DECLARE_IMPL(GPUQuerySet);
 DECLARE_IMPL(GPURenderPipeline);
+DECLARE_IMPL(GPUSampler);
 DECLARE_IMPL(GPUShaderModule);
 DECLARE_IMPL(GPUTexture);
 DECLARE_IMPL(GPUTextureView);
@@ -168,6 +171,9 @@ class Converter {
   [[nodiscard]] bool Convert(wgpu::LoadOp& out, const interop::GPULoadOp& in);
 
   [[nodiscard]] bool Convert(wgpu::StoreOp& out, const interop::GPUStoreOp& in);
+
+  [[nodiscard]] bool Convert(wgpu::BindGroupEntry& out,
+                             const interop::GPUBindGroupEntry& in);
 
   inline bool Convert(const char*& out, const std::string& in) {
     out = in.c_str();

@@ -31,7 +31,7 @@
       "args": [
         "./test.js",
         "--verbose",
-        "webgpu:api,operation,vertex_state,index_format:primitive_restart:*"
+        "webgpu:api,operation,vertex_state,correctness:overlapping_attributes:*"
       ],
       "stopAtEntry": false,
       "cwd": "/home/ben/src/gpuweb-cts",

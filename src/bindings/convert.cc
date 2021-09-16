@@ -1,6 +1,7 @@
 #include "src/bindings/convert.h"
 
 #include "src/bindings/gpubuffer.h"
+#include "src/bindings/gpusampler.h"
 #include "src/bindings/gpushadermodule.h"
 #include "src/bindings/gputexture.h"
 #include "src/bindings/gputextureview.h"
@@ -962,6 +963,34 @@ bool Converter::Convert(wgpu::StoreOp& out, const interop::GPUStoreOp& in) {
       return true;
   }
   Napi::Error::New(env, "invalid value for GPUStoreOp")
+      .ThrowAsJavaScriptException();
+  return false;
+}
+
+bool Converter::Convert(wgpu::BindGroupEntry& out,
+                        const interop::GPUBindGroupEntry& in) {
+  out = {};
+  if (!Convert(out.binding, in.binding)) {
+    return false;
+  }
+
+  if (auto* res =
+          std::get_if<interop::Interface<interop::GPUSampler>>(&in.resource)) {
+    return Convert(out.sampler, *res);
+  }
+  if (auto* res = std::get_if<interop::Interface<interop::GPUTextureView>>(
+          &in.resource)) {
+    return Convert(out.textureView, *res);
+  }
+  if (auto* res = std::get_if<interop::GPUBufferBinding>(&in.resource)) {
+    return Convert(out.buffer, res->buffer) &&
+           Convert(out.offset, res->offset) && Convert(out.size, res->size);
+  }
+  if (auto* res = std::get_if<interop::Interface<interop::GPUExternalTexture>>(
+          &in.resource)) {
+    UNIMPLEMENTED();
+  }
+  Napi::Error::New(env, "invalid value for GPUBindGroupEntry.resource")
       .ThrowAsJavaScriptException();
   return false;
 }
