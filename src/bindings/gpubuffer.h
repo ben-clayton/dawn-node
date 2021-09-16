@@ -35,6 +35,7 @@ class GPUBuffer : public interop::GPUBuffer {
   wgpu::Buffer buffer_;
   wgpu::BufferDescriptor const desc_;
   GPUDevice* device_;
+  std::vector<Napi::Reference<interop::ArrayBuffer>> mapped_;
 };
 
 }  // namespace bindings

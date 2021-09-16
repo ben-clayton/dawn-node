@@ -62,10 +62,18 @@ interop::ArrayBuffer GPUBuffer::getMappedRange(
     Napi::Error::New(env, "failed to map buffer").ThrowAsJavaScriptException();
     return {};
   }
-  return Napi::ArrayBuffer::New(env, ptr, s);
+  auto array_buffer = Napi::ArrayBuffer::New(env, ptr, s);
+  mapped_.emplace_back(Napi::Persistent(array_buffer));
+  return array_buffer;
 }
 
-void GPUBuffer::unmap(Napi::Env) { buffer_.Unmap(); }
+void GPUBuffer::unmap(Napi::Env) {
+  for (auto& mapped : mapped_) {
+    mapped.Value().Detach();
+  }
+  mapped_.clear();
+  buffer_.Unmap();
+}
 
 void GPUBuffer::destroy(Napi::Env) { buffer_.Release(); }
 

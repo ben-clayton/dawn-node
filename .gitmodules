@@ -19,3 +19,6 @@
 [submodule "third_party/spirv-headers"]
 	path = third_party/spirv-headers
 	url = https://github.com/KhronosGroup/SPIRV-Headers.git
+[submodule "third_party/node-api-headers"]
+	path = third_party/node-api-headers
+	url = git@github.com:nodejs/node-api-headers.git

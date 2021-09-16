@@ -18,8 +18,6 @@ set (CMAKE_CXX_STANDARD 17)
 
 project(dawnnode C CXX)
 
-add_definitions(-DNAPI_VERSION=10)
-
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(DAWN_ENABLE_DESKTOP_GL OFF)
@@ -32,22 +30,24 @@ add_subdirectory(third_party/dawn ${CMAKE_BINARY_DIR}/dawn)
 
 ################################################################################
 # Get the npm binary directory
-execute_process(COMMAND npm bin
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE NPM_BIN
-)
-string(REPLACE "\n" "" NPM_BIN ${NPM_BIN})
-string(REPLACE "\"" "" NPM_BIN ${NPM_BIN})
+# execute_process(COMMAND npm bin
+#         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+#         OUTPUT_VARIABLE NPM_BIN
+# )
+# string(REPLACE "\n" "" NPM_BIN ${NPM_BIN})
+# string(REPLACE "\"" "" NPM_BIN ${NPM_BIN})
 ################################################################################
 
 ################################################################################
 # Include Node-API wrappers
-execute_process(COMMAND node -p "require('node-addon-api').include"
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE NODE_ADDON_API_DIR
-)
-string(REPLACE "\n" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
-string(REPLACE "\"" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
+# execute_process(COMMAND node -p "require('node-addon-api').include"
+#         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+#         OUTPUT_VARIABLE NODE_ADDON_API_DIR
+# )
+# string(REPLACE "\n" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
+# string(REPLACE "\"" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
+set(NODE_ADDON_API_DIR   "${TINT_THIRD_PARTY_DIR}/node-addon-api")
+set(NODE_API_HEADERS_DIR "${TINT_THIRD_PARTY_DIR}/node-api-headers/include")
 ################################################################################
 
 ################################################################################
@@ -137,6 +137,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
 target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB} dawn_native dawncpp dawn_proc)
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}
+    ${NODE_API_HEADERS_DIR}
     ${NODE_ADDON_API_DIR}
     ${WEBIDL_SRC}
     ${WEBGPU_INTEROP_DIR}

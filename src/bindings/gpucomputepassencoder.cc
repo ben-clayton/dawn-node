@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+#include "src/bindings/convert.h"
+#include "src/bindings/gpubindgroup.h"
 #include "src/bindings/gpubuffer.h"
 #include "src/bindings/gpucomputepipeline.h"
 #include "src/utils/debug.h"
@@ -51,11 +53,28 @@ void GPUComputePassEncoder::writeTimestamp(
 void GPUComputePassEncoder::endPass(Napi::Env) { enc_.EndPass(); }
 
 void GPUComputePassEncoder::setBindGroup(
-    Napi::Env, interop::GPUIndex32 index,
+    Napi::Env env, interop::GPUIndex32 index,
     interop::Interface<interop::GPUBindGroup> bindGroup,
     std::optional<std::vector<interop::GPUBufferDynamicOffset>>
         dynamicOffsets) {
-  UNIMPLEMENTED();
+  Converter conv(env);
+
+  wgpu::BindGroup bg{};
+  if (!conv(bg, bindGroup)) {
+    return;
+  }
+  std::vector<uint32_t> offsets;
+  if (dynamicOffsets.has_value() && dynamicOffsets->size() > 0) {
+    offsets.resize(dynamicOffsets->size());
+    for (size_t i = 0; i < offsets.size(); i++) {
+      if (!conv(offsets[i], dynamicOffsets.value()[i])) {
+        return;
+      }
+    }
+    enc_.SetBindGroup(index, bg, offsets.size(), offsets.data());
+  } else {
+    enc_.SetBindGroup(index, bg);
+  }
 }
 
 void GPUComputePassEncoder::setBindGroup(

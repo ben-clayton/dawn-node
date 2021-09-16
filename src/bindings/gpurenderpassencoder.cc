@@ -20,31 +20,40 @@ GPURenderPassEncoder::GPURenderPassEncoder(wgpu::RenderPassEncoder enc)
 void GPURenderPassEncoder::setViewport(Napi::Env, float x, float y, float width,
                                        float height, float minDepth,
                                        float maxDepth) {
-  UNIMPLEMENTED();
+  enc_.SetViewport(x, y, width, height, minDepth, maxDepth);
 }
 
 void GPURenderPassEncoder::setScissorRect(
     Napi::Env, interop::GPUIntegerCoordinate x, interop::GPUIntegerCoordinate y,
     interop::GPUIntegerCoordinate width, interop::GPUIntegerCoordinate height) {
-  UNIMPLEMENTED();
+  enc_.SetScissorRect(x, y, width, height);
 }
 
-void GPURenderPassEncoder::setBlendConstant(Napi::Env,
+void GPURenderPassEncoder::setBlendConstant(Napi::Env env,
                                             interop::GPUColor color) {
-  UNIMPLEMENTED();
+  Converter conv(env);
+
+  wgpu::Color c{};
+  if (!conv(c, color)) {
+    return;
+  }
+
+  enc_.SetBlendConstant(&c);
 }
 
 void GPURenderPassEncoder::setStencilReference(
     Napi::Env, interop::GPUStencilValue reference) {
-  UNIMPLEMENTED();
+  enc_.SetStencilReference(reference);
 }
 
 void GPURenderPassEncoder::beginOcclusionQuery(Napi::Env,
                                                interop::GPUSize32 queryIndex) {
-  UNIMPLEMENTED();
+  enc_.BeginOcclusionQuery(queryIndex);
 }
 
-void GPURenderPassEncoder::endOcclusionQuery(Napi::Env) { UNIMPLEMENTED(); }
+void GPURenderPassEncoder::endOcclusionQuery(Napi::Env) {
+  enc_.EndOcclusionQuery();
+}
 
 void GPURenderPassEncoder::beginPipelineStatisticsQuery(
     Napi::Env, interop::Interface<interop::GPUQuerySet> querySet,
@@ -76,6 +85,7 @@ void GPURenderPassEncoder::setBindGroup(
     std::optional<std::vector<interop::GPUBufferDynamicOffset>>
         dynamicOffsets) {
   Converter conv(env);
+
   wgpu::BindGroup bg{};
   if (!conv(bg, bindGroup)) {
     return;
