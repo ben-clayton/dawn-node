@@ -26,27 +26,11 @@ GPUCommandEncoder::beginRenderPass(
     Napi::Env env, interop::GPURenderPassDescriptor descriptor) {
   Converter conv(env);
 
-  std::vector<wgpu::RenderPassColorAttachment> colorAttachments(
-      descriptor.colorAttachments.size());
-  for (size_t i = 0; i < colorAttachments.size(); i++) {
-    if (!conv(colorAttachments[i], descriptor.colorAttachments[i])) {
-      return {};
-    }
-  }
-
   wgpu::RenderPassDescriptor desc{};
-  desc.colorAttachments = colorAttachments.data();
-  desc.colorAttachmentCount = colorAttachments.size();
-
-  wgpu::RenderPassDepthStencilAttachment depthStencilAttachment{};
-  if (descriptor.depthStencilAttachment.has_value()) {
-    if (!conv(depthStencilAttachment, descriptor.depthStencilAttachment)) {
-      return {};
-    }
-    desc.depthStencilAttachment = &depthStencilAttachment;
-  }
-
-  if (!conv(desc.label, descriptor.label) ||
+  if (!conv(desc.colorAttachments, desc.colorAttachmentCount,
+            descriptor.colorAttachments) ||
+      !conv(desc.depthStencilAttachment, descriptor.depthStencilAttachment) ||
+      !conv(desc.label, descriptor.label) ||
       !conv(desc.occlusionQuerySet, descriptor.occlusionQuerySet)) {
     return {};
   }

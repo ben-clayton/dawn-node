@@ -1,6 +1,7 @@
 #ifndef DAWN_NODE_SRC_BINDINGS_CONVERT_H_
 #define DAWN_NODE_SRC_BINDINGS_CONVERT_H_
 
+#include <functional>
 #include <type_traits>
 
 #include "dawn/webgpu_cpp.h"
@@ -36,10 +37,17 @@ DECLARE_IMPL(GPUTextureView);
 class Converter {
  public:
   Converter(Napi::Env e) : env(e) {}
+  ~Converter();
 
   template <typename OUT, typename IN>
   [[nodiscard]] inline bool operator()(OUT&& out, IN&& in) {
     return Convert(std::forward<OUT>(out), std::forward<IN>(in));
+  }
+
+  template <typename OUT_A, typename OUT_B, typename IN>
+  [[nodiscard]] inline bool operator()(OUT_A&& out_a, OUT_B&& out_b, IN&& in) {
+    return Convert(std::forward<OUT_A>(out_a), std::forward<OUT_B>(out_b),
+                   std::forward<IN>(in));
   }
 
   [[nodiscard]] bool Convert(wgpu::Extent3D& out,
@@ -237,6 +245,19 @@ class Converter {
     return true;
   }
 
+  template <typename OUT, typename IN,
+            typename _ = std::enable_if_t<!std::is_same_v<IN, std::string>>>
+  inline bool Convert(OUT*& out, const std::optional<IN>& in) {
+    if (in.has_value()) {
+      auto* el = Allocate<std::remove_const_t<OUT>>();
+      if (!Convert(*el, in.value())) {
+        return false;
+      }
+      out = el;
+    }
+    return true;
+  }
+
   template <typename OUT, typename IN>
   inline bool Convert(OUT& out, const interop::Interface<IN>& in) {
     using Impl = typename ImplOf<IN>::type;
@@ -244,16 +265,31 @@ class Converter {
     return true;
   }
 
+  template <typename OUT, typename IN>
+  inline bool Convert(OUT*& out_els, uint32_t& out_count,
+                      const std::vector<IN>& in) {
+    auto* els = Allocate<std::remove_const_t<OUT>>(in.size());
+    for (size_t i = 0; i < in.size(); i++) {
+      if (!Convert(els[i], in[i])) {
+        return false;
+      }
+    }
+    out_els = els;
+    out_count = in.size();
+    return true;
+  }
+
  private:
   Napi::Env env;
-  using VertexBufferLayouts = std::unique_ptr<wgpu::VertexBufferLayout[]>;
-  std::vector<VertexBufferLayouts> vb_layouts;
-  using VertexAttributes = std::unique_ptr<wgpu::VertexAttribute[]>;
-  std::vector<VertexAttributes> vertex_attributes;
-  using ColorTargets = std::unique_ptr<wgpu::ColorTargetState[]>;
-  std::vector<ColorTargets> color_targets;
-  using BlendStates = std::unique_ptr<wgpu::BlendState>;
-  std::vector<BlendStates> blend_states;
+
+  template <typename T>
+  T* Allocate(size_t n = 1) {
+    auto* ptr = new T[n]{};
+    free_.emplace_back([ptr] { delete[] ptr; });
+    return ptr;
+  }
+
+  std::vector<std::function<void()>> free_;
 };
 
 }  // namespace bindings

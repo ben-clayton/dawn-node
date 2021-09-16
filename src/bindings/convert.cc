@@ -10,6 +10,12 @@
 namespace wgpu {
 namespace bindings {
 
+Converter::~Converter() {
+  for (auto& free : free_) {
+    free();
+  }
+}
+
 bool Converter::Convert(wgpu::Extent3D& out, const interop::GPUExtent3D& in) {
   out = {};
   if (auto* dict = std::get_if<interop::GPUExtent3DDict>(&in)) {
@@ -321,8 +327,7 @@ bool Converter::Convert(wgpu::TextureFormat& out,
       out = wgpu::TextureFormat::BC7RGBAUnormSrgb;
       return true;
     case interop::GPUTextureFormat::kDepth24UnormStencil8:
-      out = wgpu::TextureFormat::Depth24PlusStencil8;
-      return true;
+      break;  // TODO: ???
     case interop::GPUTextureFormat::kDepth32FloatStencil8:
       break;  // TODO: ???
   }
@@ -522,15 +527,8 @@ bool Converter::Convert(wgpu::PrimitiveState& out,
 bool Converter::Convert(wgpu::ColorTargetState& out,
                         const interop::GPUColorTargetState& in) {
   out = {};
-  if (in.blend.has_value()) {
-    auto blend = std::make_unique<wgpu::BlendState>();
-    if (!Convert(*blend, in.blend)) {
-      return false;
-    }
-    out.blend = blend.get();
-    blend_states.emplace_back(std::move(blend));
-  }
-  return Convert(out.format, in.format) && Convert(out.writeMask, in.writeMask);
+  return Convert(out.format, in.format) && Convert(out.blend, in.blend) &&
+         Convert(out.writeMask, in.writeMask);
 }
 
 bool Converter::Convert(wgpu::DepthStencilState& out,
@@ -556,16 +554,8 @@ bool Converter::Convert(wgpu::MultisampleState& out,
 bool Converter::Convert(wgpu::FragmentState& out,
                         const interop::GPUFragmentState& in) {
   out = {};
-  auto targets = std::make_unique<wgpu::ColorTargetState[]>(in.targets.size());
-  for (size_t i = 0; i < in.targets.size(); i++) {
-    if (!Convert(targets[i], in.targets[i])) {
-      return false;
-    }
-  }
-  out.targets = targets.get();
-  out.targetCount = in.targets.size();
-  color_targets.emplace_back(std::move(targets));
-  return Convert(out.module, in.module) &&
+  return Convert(out.targets, out.targetCount, in.targets) &&
+         Convert(out.module, in.module) &&
          Convert(out.entryPoint, in.entryPoint);
 }
 
@@ -721,35 +711,17 @@ bool Converter::Convert(wgpu::StencilFaceState& out,
 bool Converter::Convert(wgpu::VertexBufferLayout& out,
                         const interop::GPUVertexBufferLayout& in) {
   out = {};
-  auto attributes =
-      std::make_unique<wgpu::VertexAttribute[]>(in.attributes.size());
-  for (size_t i = 0; i < in.attributes.size(); i++) {
-    if (!Convert(attributes[i], in.attributes[i])) {
-      return false;
-    }
-  }
-  out.attributes = attributes.get();
-  out.attributeCount = in.attributes.size();
-  vertex_attributes.emplace_back(std::move(attributes));
-  return Convert(out.arrayStride, in.arrayStride) &&
+  return Convert(out.attributes, out.attributeCount, in.attributes) &&
+         Convert(out.arrayStride, in.arrayStride) &&
          Convert(out.stepMode, in.stepMode);
 }
 
 bool Converter::Convert(wgpu::VertexState& out,
                         const interop::GPUVertexState& in) {
   out = {};
-  out.module = *in.module.As<GPUShaderModule>();
-  auto buffers =
-      std::make_unique<wgpu::VertexBufferLayout[]>(in.buffers.size());
-  for (size_t i = 0; i < in.buffers.size(); i++) {
-    if (!Convert(buffers[i], in.buffers[i])) {
-      return false;
-    }
-  }
-  out.buffers = buffers.get();
-  out.bufferCount = in.buffers.size();
-  vb_layouts.emplace_back(std::move(buffers));
-  return Convert(out.entryPoint, in.entryPoint);
+  return Convert(out.module, in.module) &&
+         Convert(out.buffers, out.bufferCount, in.buffers) &&
+         Convert(out.entryPoint, in.entryPoint);
 }
 
 bool Converter::Convert(wgpu::VertexStepMode& out,

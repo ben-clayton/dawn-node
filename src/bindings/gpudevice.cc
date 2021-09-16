@@ -11,6 +11,7 @@
 #include "src/bindings/gpucomputepipeline.h"
 #include "src/bindings/gpupipelinelayout.h"
 #include "src/bindings/gpuqueue.h"
+#include "src/bindings/gpurenderbundleencoder.h"
 #include "src/bindings/gpurenderpipeline.h"
 #include "src/bindings/gpushadermodule.h"
 #include "src/bindings/gpusupportedlimits.h"
@@ -21,6 +22,7 @@ namespace wgpu {
 namespace bindings {
 
 namespace {
+
 class DeviceLostInfo : public interop::GPUDeviceLostInfo {
  public:
   DeviceLostInfo(interop::GPUDeviceLostReason reason, std::string message)
@@ -175,18 +177,10 @@ GPUDevice::createBindGroupLayout(
   Converter conv(env);
 
   wgpu::BindGroupLayoutDescriptor desc{};
-  if (!conv(desc.label, descriptor.label)) {
+  if (!conv(desc.label, descriptor.label) ||
+      !conv(desc.entries, desc.entryCount, descriptor.entries)) {
     return {};
   }
-
-  std::vector<wgpu::BindGroupLayoutEntry> entries(descriptor.entries.size());
-  for (size_t i = 0; i < entries.size(); i++) {
-    if (!conv(entries[i], descriptor.entries[i])) {
-      return {};
-    }
-  }
-  desc.entries = entries.data();
-  desc.entryCount = entries.size();
 
   return interop::GPUBindGroupLayout::Create<GPUBindGroupLayout>(
       env, device_.CreateBindGroupLayout(&desc));
@@ -197,18 +191,12 @@ interop::Interface<interop::GPUPipelineLayout> GPUDevice::createPipelineLayout(
   Converter conv(env);
 
   wgpu::PipelineLayoutDescriptor desc{};
-  if (!conv(desc.label, descriptor.label)) {
+  if (!conv(desc.label, descriptor.label) ||
+      !conv(desc.bindGroupLayouts, desc.bindGroupLayoutCount,
+            descriptor.bindGroupLayouts)) {
     return {};
   }
-  std::vector<wgpu::BindGroupLayout> layouts(
-      descriptor.bindGroupLayouts.size());
-  for (size_t i = 0; i < layouts.size(); i++) {
-    if (!conv(layouts[i], descriptor.bindGroupLayouts[i])) {
-      return {};
-    }
-  }
-  desc.bindGroupLayouts = layouts.data();
-  desc.bindGroupLayoutCount = layouts.size();
+
   return interop::GPUPipelineLayout::Create<GPUPipelineLayout>(
       env, device_.CreatePipelineLayout(&desc));
 }
@@ -219,18 +207,10 @@ interop::Interface<interop::GPUBindGroup> GPUDevice::createBindGroup(
 
   wgpu::BindGroupDescriptor desc{};
   if (!conv(desc.label, descriptor.label) ||
-      !conv(desc.layout, descriptor.layout)) {
+      !conv(desc.layout, descriptor.layout) ||
+      !conv(desc.entries, desc.entryCount, descriptor.entries)) {
     return {};
   }
-
-  std::vector<wgpu::BindGroupEntry> entries(descriptor.entries.size());
-  for (size_t i = 0; i < entries.size(); i++) {
-    if (!conv(entries[i], descriptor.entries[i])) {
-      return {};
-    }
-  }
-  desc.entries = entries.data();
-  desc.entryCount = entries.size();
 
   return interop::GPUBindGroup::Create<GPUBindGroup>(
       env, device_.CreateBindGroup(&desc));
@@ -241,12 +221,9 @@ interop::Interface<interop::GPUShaderModule> GPUDevice::createShaderModule(
   Converter conv(env);
 
   wgpu::ShaderModuleWGSLDescriptor wgsl_desc{};
-  if (!conv(wgsl_desc.source, descriptor.code)) {
-    return {};
-  }
-
   wgpu::ShaderModuleDescriptor sm_desc{};
-  if (!conv(sm_desc.label, descriptor.label)) {
+  if (!conv(wgsl_desc.source, descriptor.code) ||
+      !conv(sm_desc.label, descriptor.label)) {
     return {};
   }
   sm_desc.nextInChain = &wgsl_desc;
@@ -331,8 +308,20 @@ interop::Interface<interop::GPUCommandEncoder> GPUDevice::createCommandEncoder(
 
 interop::Interface<interop::GPURenderBundleEncoder>
 GPUDevice::createRenderBundleEncoder(
-    Napi::Env, interop::GPURenderBundleEncoderDescriptor descriptor) {
-  UNIMPLEMENTED();
+    Napi::Env env, interop::GPURenderBundleEncoderDescriptor descriptor) {
+  Converter conv(env);
+
+  wgpu::RenderBundleEncoderDescriptor desc{};
+  if (!conv(desc.label, descriptor.label) ||
+      !conv(desc.colorFormats, desc.colorFormatsCount,
+            descriptor.colorFormats) ||
+      !conv(desc.depthStencilFormat, descriptor.depthStencilFormat) ||
+      !conv(desc.sampleCount, descriptor.sampleCount)) {
+    return {};
+  }
+
+  return interop::GPURenderBundleEncoder::Create<GPURenderBundleEncoder>(
+      env, device_.CreateRenderBundleEncoder(&desc));
 }
 
 interop::Interface<interop::GPUQuerySet> GPUDevice::createQuerySet(
