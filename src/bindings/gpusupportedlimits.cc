@@ -28,7 +28,7 @@ unsigned long GPUSupportedLimits::getMaxTextureDimension3D(Napi::Env) {
 }
 
 unsigned long GPUSupportedLimits::getMaxTextureArrayLayers(Napi::Env) {
-  return 2048;
+  return 256;
 }
 
 unsigned long GPUSupportedLimits::getMaxBindGroups(Napi::Env) { return 4; }
@@ -54,7 +54,7 @@ unsigned long GPUSupportedLimits::getMaxSamplersPerShaderStage(Napi::Env) {
 
 unsigned long GPUSupportedLimits::getMaxStorageBuffersPerShaderStage(
     Napi::Env) {
-  return 4;
+  return 8;
 }
 
 unsigned long GPUSupportedLimits::getMaxStorageTexturesPerShaderStage(
