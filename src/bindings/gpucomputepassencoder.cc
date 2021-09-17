@@ -86,12 +86,20 @@ void GPUComputePassEncoder::setBindGroup(
 }
 
 void GPUComputePassEncoder::setBindGroup(
-    Napi::Env, interop::GPUIndex32 index,
+    Napi::Env env, interop::GPUIndex32 index,
     interop::Interface<interop::GPUBindGroup> bindGroup,
     interop::Uint32Array dynamicOffsetsData,
     interop::GPUSize64 dynamicOffsetsDataStart,
     interop::GPUSize32 dynamicOffsetsDataLength) {
-  UNIMPLEMENTED();
+  Converter conv(env);
+
+  wgpu::BindGroup bg{};
+  if (!conv(bg, bindGroup)) {
+    return;
+  }
+
+  enc_.SetBindGroup(index, bg, dynamicOffsetsDataLength,
+                    dynamicOffsetsData.Data() + dynamicOffsetsDataStart);
 }
 
 void GPUComputePassEncoder::pushDebugGroup(Napi::Env, std::string groupLabel) {
