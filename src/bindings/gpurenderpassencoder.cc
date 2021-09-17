@@ -119,14 +119,14 @@ void GPURenderPassEncoder::setBindGroup(
 }
 
 void GPURenderPassEncoder::pushDebugGroup(Napi::Env, std::string groupLabel) {
-  UNIMPLEMENTED();
+  enc_.PushDebugGroup(groupLabel.c_str());
 }
 
-void GPURenderPassEncoder::popDebugGroup(Napi::Env) { UNIMPLEMENTED(); }
+void GPURenderPassEncoder::popDebugGroup(Napi::Env) { enc_.PopDebugGroup(); }
 
 void GPURenderPassEncoder::insertDebugMarker(Napi::Env,
                                              std::string markerLabel) {
-  UNIMPLEMENTED();
+  enc_.InsertDebugMarker(markerLabel.c_str());
 }
 
 void GPURenderPassEncoder::setPipeline(

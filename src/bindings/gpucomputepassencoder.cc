@@ -6,6 +6,7 @@
 #include "src/bindings/gpubindgroup.h"
 #include "src/bindings/gpubuffer.h"
 #include "src/bindings/gpucomputepipeline.h"
+#include "src/bindings/gpuqueryset.h"
 #include "src/utils/debug.h"
 
 namespace wgpu {
@@ -45,9 +46,16 @@ void GPUComputePassEncoder::endPipelineStatisticsQuery(Napi::Env) {
 }
 
 void GPUComputePassEncoder::writeTimestamp(
-    Napi::Env, interop::Interface<interop::GPUQuerySet> querySet,
+    Napi::Env env, interop::Interface<interop::GPUQuerySet> querySet,
     interop::GPUSize32 queryIndex) {
-  UNIMPLEMENTED();
+  Converter conv(env);
+
+  wgpu::QuerySet q{};
+  if (!conv(q, querySet)) {
+    return;
+  }
+
+  enc_.WriteTimestamp(q, queryIndex);
 }
 
 void GPUComputePassEncoder::endPass(Napi::Env) { enc_.EndPass(); }
@@ -87,14 +95,14 @@ void GPUComputePassEncoder::setBindGroup(
 }
 
 void GPUComputePassEncoder::pushDebugGroup(Napi::Env, std::string groupLabel) {
-  UNIMPLEMENTED();
+  enc_.PushDebugGroup(groupLabel.c_str());
 }
 
-void GPUComputePassEncoder::popDebugGroup(Napi::Env) { UNIMPLEMENTED(); }
+void GPUComputePassEncoder::popDebugGroup(Napi::Env) { enc_.PopDebugGroup(); }
 
 void GPUComputePassEncoder::insertDebugMarker(Napi::Env,
                                               std::string markerLabel) {
-  UNIMPLEMENTED();
+  enc_.InsertDebugMarker(markerLabel.c_str());
 }
 
 std::optional<std::string> GPUComputePassEncoder::getLabel(Napi::Env) {

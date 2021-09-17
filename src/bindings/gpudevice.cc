@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "src/bindings/convert.h"
+#include "src/bindings/errors.h"
 #include "src/bindings/gpubindgroup.h"
 #include "src/bindings/gpubindgrouplayout.h"
 #include "src/bindings/gpubuffer.h"
@@ -236,14 +237,7 @@ GPUDevice::createComputePipeline(
   Converter conv(env);
 
   wgpu::ComputePipelineDescriptor desc{};
-  if (!descriptor.layout.has_value()) {
-    Napi::Error::New(env, "missing GPUComputePipelineDescriptor.layout")
-        .ThrowAsJavaScriptException();
-    return {};
-  }
-  desc.layout = *descriptor.layout.value().As<GPUPipelineLayout>();
-  if (!conv(desc.label, descriptor.label) ||
-      !conv(desc.computeStage, descriptor.compute)) {
+  if (!conv(desc, descriptor)) {
     return {};
   }
 
@@ -256,27 +250,7 @@ interop::Interface<interop::GPURenderPipeline> GPUDevice::createRenderPipeline(
   Converter conv(env);
 
   wgpu::RenderPipelineDescriptor desc{};
-  wgpu::DepthStencilState depthStencil{};
-  if (descriptor.depthStencil.has_value()) {
-    if (!conv(depthStencil, descriptor.depthStencil)) {
-      return {};
-    }
-    desc.depthStencil = &depthStencil;
-  }
-
-  wgpu::FragmentState fragment{};
-  if (descriptor.fragment.has_value()) {
-    if (!conv(fragment, descriptor.fragment)) {
-      return {};
-    }
-    desc.fragment = &fragment;
-  }
-
-  if (!conv(desc.label, descriptor.label) ||          //
-      !conv(desc.layout, descriptor.layout) ||        //
-      !conv(desc.vertex, descriptor.vertex) ||        //
-      !conv(desc.primitive, descriptor.primitive) ||  //
-      !conv(desc.multisample, descriptor.multisample)) {
+  if (!conv(desc, descriptor)) {
     return {};
   }
 
@@ -287,13 +261,91 @@ interop::Interface<interop::GPURenderPipeline> GPUDevice::createRenderPipeline(
 interop::Promise<interop::Interface<interop::GPUComputePipeline>>
 GPUDevice::createComputePipelineAsync(
     Napi::Env env, interop::GPUComputePipelineDescriptor descriptor) {
-  UNIMPLEMENTED();
+  Converter conv(env);
+
+  wgpu::ComputePipelineDescriptor desc{};
+  if (!conv(desc, descriptor)) {
+    return {env};
+  }
+
+  using Promise =
+      interop::Promise<interop::Interface<interop::GPUComputePipeline>>;
+
+  struct Context {
+    Napi::Env env;
+    Promise promise;
+    AsyncTask task;
+  };
+  auto ctx = new Context{env, env, async_};
+
+  device_.CreateComputePipelineAsync(
+      &desc,
+      [](WGPUCreatePipelineAsyncStatus status, WGPUComputePipeline pipeline,
+         char const* message, void* userdata) {
+        auto* c = static_cast<Context*>(userdata);
+
+        switch (status) {
+          case WGPUCreatePipelineAsyncStatus::
+              WGPUCreatePipelineAsyncStatus_Success:
+            c->promise.Resolve(
+                interop::GPUComputePipeline::Create<GPUComputePipeline>(
+                    c->env, pipeline));
+            break;
+          default:
+            c->promise.Reject(Errors::OperationError(c->env));
+            break;
+        }
+
+        delete c;
+      },
+      ctx);
+
+  return ctx->promise;
 }
 
 interop::Promise<interop::Interface<interop::GPURenderPipeline>>
 GPUDevice::createRenderPipelineAsync(
     Napi::Env env, interop::GPURenderPipelineDescriptor descriptor) {
-  UNIMPLEMENTED();
+  Converter conv(env);
+
+  wgpu::RenderPipelineDescriptor desc{};
+  if (!conv(desc, descriptor)) {
+    return {env};
+  }
+
+  using Promise =
+      interop::Promise<interop::Interface<interop::GPURenderPipeline>>;
+
+  struct Context {
+    Napi::Env env;
+    Promise promise;
+    AsyncTask task;
+  };
+  auto ctx = new Context{env, env, async_};
+
+  device_.CreateRenderPipelineAsync(
+      &desc,
+      [](WGPUCreatePipelineAsyncStatus status, WGPURenderPipeline pipeline,
+         char const* message, void* userdata) {
+        auto* c = static_cast<Context*>(userdata);
+
+        switch (status) {
+          case WGPUCreatePipelineAsyncStatus::
+              WGPUCreatePipelineAsyncStatus_Success:
+            c->promise.Resolve(
+                interop::GPURenderPipeline::Create<GPURenderPipeline>(
+                    c->env, pipeline));
+            break;
+          default:
+            c->promise.Reject(Errors::OperationError(c->env));
+            break;
+        }
+
+        delete c;
+      },
+      ctx);
+
+  return ctx->promise;
 }
 
 interop::Interface<interop::GPUCommandEncoder> GPUDevice::createCommandEncoder(

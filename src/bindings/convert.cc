@@ -1,6 +1,7 @@
 #include "src/bindings/convert.h"
 
 #include "src/bindings/gpubuffer.h"
+#include "src/bindings/gpupipelinelayout.h"
 #include "src/bindings/gpusampler.h"
 #include "src/bindings/gpushadermodule.h"
 #include "src/bindings/gputexture.h"
@@ -1172,6 +1173,30 @@ bool Converter::Convert(wgpu::FilterMode& out,
   Napi::Error::New(env, "invalid value for GPUFilterMode")
       .ThrowAsJavaScriptException();
   return false;
+}
+
+bool Converter::Convert(wgpu::ComputePipelineDescriptor& out,
+                        const interop::GPUComputePipelineDescriptor& in) {
+  if (!in.layout.has_value()) {
+    Napi::Error::New(env, "missing GPUComputePipelineDescriptor.layout")
+        .ThrowAsJavaScriptException();
+    return false;
+  }
+  return Convert(out.label, in.label) &&     //
+         Convert(out.layout, *in.layout) &&  //
+         Convert(out.computeStage, in.compute);
+}
+
+bool Converter::Convert(wgpu::RenderPipelineDescriptor& out,
+                        const interop::GPURenderPipelineDescriptor& in) {
+  wgpu::RenderPipelineDescriptor desc{};
+  return Convert(out.label, in.label) &&                //
+         Convert(out.layout, in.layout) &&              //
+         Convert(out.vertex, in.vertex) &&              //
+         Convert(out.primitive, in.primitive) &&        //
+         Convert(out.depthStencil, in.depthStencil) &&  //
+         Convert(out.multisample, in.multisample) &&
+         Convert(out.fragment, in.fragment);
 }
 
 }  // namespace bindings

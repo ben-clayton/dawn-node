@@ -58,14 +58,14 @@ void GPURenderBundleEncoder::setBindGroup(
 }
 
 void GPURenderBundleEncoder::pushDebugGroup(Napi::Env, std::string groupLabel) {
-  UNIMPLEMENTED();
+  enc_.PushDebugGroup(groupLabel.c_str());
 }
 
-void GPURenderBundleEncoder::popDebugGroup(Napi::Env) { UNIMPLEMENTED(); }
+void GPURenderBundleEncoder::popDebugGroup(Napi::Env) { enc_.PopDebugGroup(); }
 
 void GPURenderBundleEncoder::insertDebugMarker(Napi::Env,
                                                std::string markerLabel) {
-  UNIMPLEMENTED();
+  enc_.InsertDebugMarker(markerLabel.c_str());
 }
 
 void GPURenderBundleEncoder::setPipeline(

@@ -11,7 +11,7 @@ namespace bindings {
 
 class GPUCommandEncoder : public interop::GPUCommandEncoder {
  public:
-  GPUCommandEncoder(wgpu::CommandEncoder cmd_enc);
+  GPUCommandEncoder(wgpu::CommandEncoder enc);
 
   interop::Interface<interop::GPURenderPassEncoder> beginRenderPass(
       Napi::Env, interop::GPURenderPassDescriptor descriptor) override;
@@ -52,7 +52,7 @@ class GPUCommandEncoder : public interop::GPUCommandEncoder {
   void setLabel(Napi::Env, std::optional<std::string> value) override;
 
  private:
-  wgpu::CommandEncoder cmd_enc_;
+  wgpu::CommandEncoder enc_;
 };
 
 }  // namespace bindings

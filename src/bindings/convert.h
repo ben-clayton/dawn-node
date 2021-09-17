@@ -7,6 +7,7 @@
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
 #include "napi.h"
+#include "src/bindings/errors.h"
 #include "webgpu_interop.h"
 
 namespace wgpu {
@@ -50,6 +51,8 @@ class Converter {
     return Convert(std::forward<OUT_A>(out_a), std::forward<OUT_B>(out_b),
                    std::forward<IN>(in));
   }
+
+  inline Napi::Env Env() const { return env; }
 
   [[nodiscard]] bool Convert(wgpu::Extent3D& out,
                              const interop::GPUExtent3D& in);
@@ -225,6 +228,12 @@ class Converter {
   [[nodiscard]] bool Convert(wgpu::FilterMode& out,
                              const interop::GPUFilterMode& in);
 
+  [[nodiscard]] bool Convert(wgpu::ComputePipelineDescriptor& out,
+                             const interop::GPUComputePipelineDescriptor& in);
+
+  [[nodiscard]] bool Convert(wgpu::RenderPipelineDescriptor& out,
+                             const interop::GPURenderPipelineDescriptor& in);
+
   inline bool Convert(const char*& out, const std::string& in) {
     out = in.c_str();
     return true;
@@ -274,6 +283,11 @@ class Converter {
   inline bool Convert(OUT& out, const interop::Interface<IN>& in) {
     using Impl = typename ImplOf<IN>::type;
     out = *in.template As<Impl>();
+    if (!out) {
+      // Interface object has been destroyed.
+      Errors::OperationError(env).ThrowAsJavaScriptException();
+      return false;
+    }
     return true;
   }
 

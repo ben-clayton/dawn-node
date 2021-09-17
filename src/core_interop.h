@@ -66,8 +66,10 @@ class Promise {
     deferred.Resolve(Marshal(deferred.Env(), std::forward<T>(value)));
   }
 
-  void Reject(std::string reason) const {
-    deferred.Reject(Napi::String::New(deferred.Env(), std::move(reason)));
+  void Reject(Napi::Object obj) const { deferred.Reject(obj); }
+  void Reject(Napi::Error err) const { deferred.Reject(err.Value()); }
+  void Reject(std::string err) const {
+    Reject(Napi::Error::New(deferred.Env(), err));
   }
 
  private:
@@ -84,7 +86,7 @@ class Promise<void> {
   void Resolve() const { deferred.Resolve(deferred.Env().Undefined()); }
   void Reject(Napi::Object obj) const { deferred.Reject(obj); }
   void Reject(Napi::Error err) const { deferred.Reject(err.Value()); }
-  void Reject(const char* err) const {
+  void Reject(std::string err) const {
     Reject(Napi::Error::New(deferred.Env(), err));
   }
 

@@ -18,8 +18,7 @@ namespace bindings {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPUCommandEncoder
 ////////////////////////////////////////////////////////////////////////////////
-GPUCommandEncoder::GPUCommandEncoder(wgpu::CommandEncoder cmd_enc)
-    : cmd_enc_(cmd_enc) {}
+GPUCommandEncoder::GPUCommandEncoder(wgpu::CommandEncoder enc) : enc_(enc) {}
 
 interop::Interface<interop::GPURenderPassEncoder>
 GPUCommandEncoder::beginRenderPass(
@@ -35,7 +34,7 @@ GPUCommandEncoder::beginRenderPass(
     return {};
   }
   return interop::GPURenderPassEncoder::Create<GPURenderPassEncoder>(
-      env, cmd_enc_.BeginRenderPass(&desc));
+      env, enc_.BeginRenderPass(&desc));
 }
 
 interop::Interface<interop::GPUComputePassEncoder>
@@ -44,7 +43,7 @@ GPUCommandEncoder::beginComputePass(
     std::optional<interop::GPUComputePassDescriptor> descriptor) {
   wgpu::ComputePassDescriptor desc{};
   return interop::GPUComputePassEncoder::Create<GPUComputePassEncoder>(
-      env, cmd_enc_.BeginComputePass(&desc));
+      env, enc_.BeginComputePass(&desc));
 }
 
 void GPUCommandEncoder::copyBufferToBuffer(
@@ -61,7 +60,7 @@ void GPUCommandEncoder::copyBufferToBuffer(
     return;
   }
 
-  cmd_enc_.CopyBufferToBuffer(src, sourceOffset, dst, destinationOffset, size);
+  enc_.CopyBufferToBuffer(src, sourceOffset, dst, destinationOffset, size);
 }
 
 void GPUCommandEncoder::copyBufferToTexture(
@@ -78,7 +77,7 @@ void GPUCommandEncoder::copyBufferToTexture(
     return;
   }
 
-  cmd_enc_.CopyBufferToTexture(&src, &dst, &size);
+  enc_.CopyBufferToTexture(&src, &dst, &size);
 }
 
 void GPUCommandEncoder::copyTextureToBuffer(
@@ -95,7 +94,7 @@ void GPUCommandEncoder::copyTextureToBuffer(
     return;
   }
 
-  cmd_enc_.CopyTextureToBuffer(&src, &dst, &size);
+  enc_.CopyTextureToBuffer(&src, &dst, &size);
 }
 
 void GPUCommandEncoder::copyTextureToTexture(
@@ -112,23 +111,30 @@ void GPUCommandEncoder::copyTextureToTexture(
     return;
   }
 
-  cmd_enc_.CopyTextureToTexture(&src, &dst, &size);
+  enc_.CopyTextureToTexture(&src, &dst, &size);
 }
 
 void GPUCommandEncoder::pushDebugGroup(Napi::Env, std::string groupLabel) {
-  UNIMPLEMENTED();
+  enc_.PushDebugGroup(groupLabel.c_str());
 }
 
-void GPUCommandEncoder::popDebugGroup(Napi::Env) { UNIMPLEMENTED(); }
+void GPUCommandEncoder::popDebugGroup(Napi::Env) { enc_.PopDebugGroup(); }
 
 void GPUCommandEncoder::insertDebugMarker(Napi::Env, std::string markerLabel) {
-  UNIMPLEMENTED();
+  enc_.InsertDebugMarker(markerLabel.c_str());
 }
 
 void GPUCommandEncoder::writeTimestamp(
-    Napi::Env, interop::Interface<interop::GPUQuerySet> querySet,
+    Napi::Env env, interop::Interface<interop::GPUQuerySet> querySet,
     interop::GPUSize32 queryIndex) {
-  UNIMPLEMENTED();
+  Converter conv(env);
+
+  wgpu::QuerySet q{};
+  if (!conv(q, querySet)) {
+    return;
+  }
+
+  enc_.WriteTimestamp(q, queryIndex);
 }
 
 void GPUCommandEncoder::resolveQuerySet(
@@ -152,7 +158,7 @@ void GPUCommandEncoder::resolveQuerySet(
     return;
   }
 
-  cmd_enc_.ResolveQuerySet(q, f, c, b, o);
+  enc_.ResolveQuerySet(q, f, c, b, o);
 }
 
 interop::Interface<interop::GPUCommandBuffer> GPUCommandEncoder::finish(
@@ -160,7 +166,7 @@ interop::Interface<interop::GPUCommandBuffer> GPUCommandEncoder::finish(
     std::optional<interop::GPUCommandBufferDescriptor> descriptor) {
   wgpu::CommandBufferDescriptor desc{};
   return interop::GPUCommandBuffer::Create<GPUCommandBuffer>(
-      env, cmd_enc_.Finish(&desc));
+      env, enc_.Finish(&desc));
 }
 
 std::optional<std::string> GPUCommandEncoder::getLabel(Napi::Env) {
