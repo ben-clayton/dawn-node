@@ -83,8 +83,9 @@ class Promise<void> {
 
   void Resolve() const { deferred.Resolve(deferred.Env().Undefined()); }
   void Reject(Napi::Object obj) const { deferred.Reject(obj); }
+  void Reject(Napi::Error err) const { deferred.Reject(err.Value()); }
   void Reject(const char* err) const {
-    Reject(Napi::Error::New(deferred.Env(), err).Value());
+    Reject(Napi::Error::New(deferred.Env(), err));
   }
 
  private:

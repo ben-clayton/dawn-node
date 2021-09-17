@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "src/bindings/convert.h"
+#include "src/bindings/errors.h"
 #include "src/bindings/gputextureview.h"
 #include "src/utils/debug.h"
 
@@ -17,6 +18,11 @@ GPUTexture::GPUTexture(wgpu::Texture texture) : texture_(texture) {}
 interop::Interface<interop::GPUTextureView> GPUTexture::createView(
     Napi::Env env,
     std::optional<interop::GPUTextureViewDescriptor> descriptor) {
+  if (!texture_) {
+    Errors::OperationError(env).ThrowAsJavaScriptException();
+    return {};
+  }
+
   if (descriptor.has_value()) {
     wgpu::TextureViewDescriptor desc{};
     Converter conv(env);

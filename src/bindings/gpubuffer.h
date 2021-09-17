@@ -31,11 +31,30 @@ class GPUBuffer : public interop::GPUBuffer {
   void setLabel(Napi::Env, std::optional<std::string> value) override;
 
  private:
+  struct Mapping {
+    uint64_t start;
+    uint64_t end;
+    inline bool Intersects(uint64_t s, uint64_t e) const {
+      return s < end && e > start;
+    }
+    Napi::Reference<interop::ArrayBuffer> buffer;
+  };
+
+  // https://www.w3.org/TR/webgpu/#buffer-interface
+  enum class State {
+    Unmapped,
+    Mapped,
+    MappedAtCreation,
+    MappingPending,
+    Destroyed,
+  };
+
   wgpu::Buffer buffer_;
   wgpu::BufferDescriptor const desc_;
   wgpu::Device const device_;
   AsyncRunner async_;
-  std::vector<Napi::Reference<interop::ArrayBuffer>> mapped_;
+  State state_ = State::Unmapped;
+  std::vector<Mapping> mapped_;
 };
 
 }  // namespace bindings

@@ -8,36 +8,35 @@ namespace bindings {
 
 class Errors {
  public:
-  using Error = interop::Interface<interop::DOMException>;
-  static Error HierarchyRequestError(Napi::Env);
-  static Error WrongDocumentError(Napi::Env);
-  static Error InvalidCharacterError(Napi::Env);
-  static Error NoModificationAllowedError(Napi::Env);
-  static Error NotFoundError(Napi::Env);
-  static Error NotSupportedError(Napi::Env);
-  static Error InUseAttributeError(Napi::Env);
-  static Error InvalidStateError(Napi::Env);
-  static Error SyntaxError(Napi::Env);
-  static Error InvalidModificationError(Napi::Env);
-  static Error NamespaceError(Napi::Env);
-  static Error SecurityError(Napi::Env);
-  static Error NetworkError(Napi::Env);
-  static Error AbortError(Napi::Env);
-  static Error URLMismatchError(Napi::Env);
-  static Error QuotaExceededError(Napi::Env);
-  static Error TimeoutError(Napi::Env);
-  static Error InvalidNodeTypeError(Napi::Env);
-  static Error DataCloneError(Napi::Env);
-  static Error EncodingError(Napi::Env);
-  static Error NotReadableError(Napi::Env);
-  static Error UnknownError(Napi::Env);
-  static Error ConstraintError(Napi::Env);
-  static Error DataError(Napi::Env);
-  static Error TransactionInactiveError(Napi::Env);
-  static Error ReadOnlyError(Napi::Env);
-  static Error VersionError(Napi::Env);
-  static Error OperationError(Napi::Env);
-  static Error NotAllowedError(Napi::Env);
+  static Napi::Error HierarchyRequestError(Napi::Env);
+  static Napi::Error WrongDocumentError(Napi::Env);
+  static Napi::Error InvalidCharacterError(Napi::Env);
+  static Napi::Error NoModificationAllowedError(Napi::Env);
+  static Napi::Error NotFoundError(Napi::Env);
+  static Napi::Error NotSupportedError(Napi::Env);
+  static Napi::Error InUseAttributeError(Napi::Env);
+  static Napi::Error InvalidStateError(Napi::Env);
+  static Napi::Error SyntaxError(Napi::Env);
+  static Napi::Error InvalidModificationError(Napi::Env);
+  static Napi::Error NamespaceError(Napi::Env);
+  static Napi::Error SecurityError(Napi::Env);
+  static Napi::Error NetworkError(Napi::Env);
+  static Napi::Error AbortError(Napi::Env);
+  static Napi::Error URLMismatchError(Napi::Env);
+  static Napi::Error QuotaExceededError(Napi::Env);
+  static Napi::Error TimeoutError(Napi::Env);
+  static Napi::Error InvalidNodeTypeError(Napi::Env);
+  static Napi::Error DataCloneError(Napi::Env);
+  static Napi::Error EncodingError(Napi::Env);
+  static Napi::Error NotReadableError(Napi::Env);
+  static Napi::Error UnknownError(Napi::Env);
+  static Napi::Error ConstraintError(Napi::Env);
+  static Napi::Error DataError(Napi::Env);
+  static Napi::Error TransactionInactiveError(Napi::Env);
+  static Napi::Error ReadOnlyError(Napi::Env);
+  static Napi::Error VersionError(Napi::Env);
+  static Napi::Error OperationError(Napi::Env);
+  static Napi::Error NotAllowedError(Napi::Env);
 };
 
 }  // namespace bindings

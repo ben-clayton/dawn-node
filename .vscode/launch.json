@@ -28,11 +28,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "/home/ben/bin/node/bin/node",
-      "args": [
-        "./test.js",
-        "--verbose",
-        "webgpu:api,validation,buffer,mapping:mapAsync,*"
-      ],
+      "args": ["./test.js", "--verbose", "webgpu:api,validation,*"],
       "stopAtEntry": false,
       "cwd": "/home/ben/src/gpuweb-cts",
       "environment": [],

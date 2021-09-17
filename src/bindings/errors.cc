@@ -1,6 +1,8 @@
 
 #include "src/bindings/errors.h"
 
+#include <cassert>
+
 namespace wgpu {
 namespace bindings {
 
@@ -35,167 +37,127 @@ const char* kVersionError = "VersionError";
 const char* kOperationError = "OperationError";
 const char* kNotAllowedError = "NotAllowedError";
 
-class DOMException : public interop::DOMException {
- public:
-  std::string name_;
-  std::string message_;
-  unsigned short code_;
-
-  DOMException(std::string name, std::string message, unsigned short code)
-      : name_(name), message_(message), code_(code) {}
-
-  std::string getName(Napi::Env) override { return name_; }
-
-  std::string getMessage(Napi::Env) override { return message_; }
-
-  unsigned short getCode(Napi::Env) override { return code_; }
-};
+static Napi::Error New(Napi::Env env, std::string name,
+                       std::string message = {}, unsigned short code = 0) {
+  auto err = Napi::Error::New(env);
+  err.Set("name", name);
+  err.Set("message", message.empty() ? name : message);
+  err.Set("code", static_cast<double>(code));
+  return err;
+}
 
 }  // namespace
 
-Errors::Error Errors::HierarchyRequestError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(
-      env, kHierarchyRequestError, kHierarchyRequestError, 0);
+Napi::Error Errors::HierarchyRequestError(Napi::Env env) {
+  return New(env, kHierarchyRequestError);
 }
 
-Errors::Error Errors::WrongDocumentError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kWrongDocumentError,
-                                                     kWrongDocumentError, 0);
+Napi::Error Errors::WrongDocumentError(Napi::Env env) {
+  return New(env, kWrongDocumentError);
 }
 
-Errors::Error Errors::InvalidCharacterError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(
-      env, kInvalidCharacterError, kInvalidCharacterError, 0);
+Napi::Error Errors::InvalidCharacterError(Napi::Env env) {
+  return New(env, kInvalidCharacterError);
 }
 
-Errors::Error Errors::NoModificationAllowedError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(
-      env, kNoModificationAllowedError, kNoModificationAllowedError, 0);
+Napi::Error Errors::NoModificationAllowedError(Napi::Env env) {
+  return New(env, kNoModificationAllowedError);
 }
 
-Errors::Error Errors::NotFoundError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kNotFoundError,
-                                                     kNotFoundError, 0);
+Napi::Error Errors::NotFoundError(Napi::Env env) {
+  return New(env, kNotFoundError);
 }
 
-Errors::Error Errors::NotSupportedError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kNotSupportedError,
-                                                     kNotSupportedError, 0);
+Napi::Error Errors::NotSupportedError(Napi::Env env) {
+  return New(env, kNotSupportedError);
 }
 
-Errors::Error Errors::InUseAttributeError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kInUseAttributeError,
-                                                     kInUseAttributeError, 0);
+Napi::Error Errors::InUseAttributeError(Napi::Env env) {
+  return New(env, kInUseAttributeError);
 }
 
-Errors::Error Errors::InvalidStateError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kInvalidStateError,
-                                                     kInvalidStateError, 0);
+Napi::Error Errors::InvalidStateError(Napi::Env env) {
+  return New(env, kInvalidStateError);
 }
 
-Errors::Error Errors::SyntaxError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kSyntaxError,
-                                                     kSyntaxError, 0);
+Napi::Error Errors::SyntaxError(Napi::Env env) {
+  return New(env, kSyntaxError);
 }
 
-Errors::Error Errors::InvalidModificationError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(
-      env, kInvalidModificationError, kInvalidModificationError, 0);
+Napi::Error Errors::InvalidModificationError(Napi::Env env) {
+  return New(env, kInvalidModificationError);
 }
 
-Errors::Error Errors::NamespaceError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kNamespaceError,
-                                                     kNamespaceError, 0);
+Napi::Error Errors::NamespaceError(Napi::Env env) {
+  return New(env, kNamespaceError);
 }
 
-Errors::Error Errors::SecurityError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kSecurityError,
-                                                     kSecurityError, 0);
+Napi::Error Errors::SecurityError(Napi::Env env) {
+  return New(env, kSecurityError);
 }
 
-Errors::Error Errors::NetworkError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kNetworkError,
-                                                     kNetworkError, 0);
+Napi::Error Errors::NetworkError(Napi::Env env) {
+  return New(env, kNetworkError);
 }
 
-Errors::Error Errors::AbortError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kAbortError,
-                                                     kAbortError, 0);
+Napi::Error Errors::AbortError(Napi::Env env) { return New(env, kAbortError); }
+
+Napi::Error Errors::URLMismatchError(Napi::Env env) {
+  return New(env, kURLMismatchError);
 }
 
-Errors::Error Errors::URLMismatchError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kURLMismatchError,
-                                                     kURLMismatchError, 0);
+Napi::Error Errors::QuotaExceededError(Napi::Env env) {
+  return New(env, kQuotaExceededError);
 }
 
-Errors::Error Errors::QuotaExceededError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kQuotaExceededError,
-                                                     kQuotaExceededError, 0);
+Napi::Error Errors::TimeoutError(Napi::Env env) {
+  return New(env, kTimeoutError);
 }
 
-Errors::Error Errors::TimeoutError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kTimeoutError,
-                                                     kTimeoutError, 0);
+Napi::Error Errors::InvalidNodeTypeError(Napi::Env env) {
+  return New(env, kInvalidNodeTypeError);
 }
 
-Errors::Error Errors::InvalidNodeTypeError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kInvalidNodeTypeError,
-                                                     kInvalidNodeTypeError, 0);
+Napi::Error Errors::DataCloneError(Napi::Env env) {
+  return New(env, kDataCloneError);
 }
 
-Errors::Error Errors::DataCloneError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kDataCloneError,
-                                                     kDataCloneError, 0);
+Napi::Error Errors::EncodingError(Napi::Env env) {
+  return New(env, kEncodingError);
 }
 
-Errors::Error Errors::EncodingError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kEncodingError,
-                                                     kEncodingError, 0);
+Napi::Error Errors::NotReadableError(Napi::Env env) {
+  return New(env, kNotReadableError);
 }
 
-Errors::Error Errors::NotReadableError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kNotReadableError,
-                                                     kNotReadableError, 0);
+Napi::Error Errors::UnknownError(Napi::Env env) {
+  return New(env, kUnknownError);
 }
 
-Errors::Error Errors::UnknownError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kUnknownError,
-                                                     kUnknownError, 0);
+Napi::Error Errors::ConstraintError(Napi::Env env) {
+  return New(env, kConstraintError);
 }
 
-Errors::Error Errors::ConstraintError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kConstraintError,
-                                                     kConstraintError, 0);
+Napi::Error Errors::DataError(Napi::Env env) { return New(env, kDataError); }
+
+Napi::Error Errors::TransactionInactiveError(Napi::Env env) {
+  return New(env, kTransactionInactiveError);
 }
 
-Errors::Error Errors::DataError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kDataError,
-                                                     kDataError, 0);
+Napi::Error Errors::ReadOnlyError(Napi::Env env) {
+  return New(env, kReadOnlyError);
 }
 
-Errors::Error Errors::TransactionInactiveError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(
-      env, kTransactionInactiveError, kTransactionInactiveError, 0);
+Napi::Error Errors::VersionError(Napi::Env env) {
+  return New(env, kVersionError);
 }
 
-Errors::Error Errors::ReadOnlyError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kReadOnlyError,
-                                                     kReadOnlyError, 0);
+Napi::Error Errors::OperationError(Napi::Env env) {
+  return New(env, kOperationError);
 }
 
-Errors::Error Errors::VersionError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kVersionError,
-                                                     kVersionError, 0);
-}
-
-Errors::Error Errors::OperationError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kOperationError,
-                                                     kOperationError, 0);
-}
-
-Errors::Error Errors::NotAllowedError(Napi::Env env) {
-  return interop::DOMException::Create<DOMException>(env, kNotAllowedError,
-                                                     kNotAllowedError, 0);
+Napi::Error Errors::NotAllowedError(Napi::Env env) {
+  return New(env, kNotAllowedError);
 }
 
 }  // namespace bindings
