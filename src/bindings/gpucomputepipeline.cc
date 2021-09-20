@@ -16,7 +16,7 @@ GPUComputePipeline::GPUComputePipeline(wgpu::ComputePipeline pipeline)
     : pipeline_(pipeline) {}
 
 interop::Interface<interop::GPUBindGroupLayout>
-GPUComputePipeline::getBindGroupLayout(Napi::Env env, unsigned long index) {
+GPUComputePipeline::getBindGroupLayout(Napi::Env env, uint32_t index) {
   return interop::GPUBindGroupLayout::Create<GPUBindGroupLayout>(
       env, pipeline_.GetBindGroupLayout(index));
 }

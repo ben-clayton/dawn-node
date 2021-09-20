@@ -1,14 +1,18 @@
 {{- define "Type" -}}
 {{-        if IsUndefinedType $}}void
 {{-   else if IsTypeName      $}}
-{{-          if eq $.Name "boolean"        }}bool
-{{-     else if eq $.Name "object"         }}Object
-{{-     else if eq $.Name "DOMString"      }}std::string
-{{-     else if eq $.Name "USVString"      }}std::string
-{{-     else if eq $.Name "ArrayBuffer"    }}ArrayBuffer
-{{-     else if IsInterface (Lookup $.Name)}}Interface<{{$.Name}}>
-{{-     else                               }}{{$.Name}}
-{{-     end                                }}
+{{-          if eq $.Name "boolean"             }}bool
+{{-     else if eq $.Name "long"                }}int32_t
+{{-     else if eq $.Name "unsigned long"       }}uint32_t
+{{-     else if eq $.Name "long long"           }}int64_t
+{{-     else if eq $.Name "unsigned long long"  }}uint64_t
+{{-     else if eq $.Name "object"              }}Object
+{{-     else if eq $.Name "DOMString"           }}std::string
+{{-     else if eq $.Name "USVString"           }}std::string
+{{-     else if eq $.Name "ArrayBuffer"         }}ArrayBuffer
+{{-     else if IsInterface (Lookup $.Name)     }}Interface<{{$.Name}}>
+{{-     else                                    }}{{$.Name}}
+{{-     end                                     }}
 {{-   else if IsParametrizedType $}}{{$.Name}}<{{template "TypeList" $.Elems}}>
 {{-   else if IsNullableType     $}}std::optional<{{template "Type" $.Type}}>
 {{-   else if IsUnionType        $}}std::variant<{{template "VariantTypeList" $.Types}}>

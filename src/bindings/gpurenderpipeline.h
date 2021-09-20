@@ -16,7 +16,7 @@ class GPURenderPipeline : public interop::GPURenderPipeline {
   operator wgpu::RenderPipeline() const { return pipeline_; }
 
   interop::Interface<interop::GPUBindGroupLayout> getBindGroupLayout(
-      Napi::Env, unsigned long index) override;
+      Napi::Env, uint32_t index) override;
   std::optional<std::string> getLabel(Napi::Env) override;
   void setLabel(Napi::Env, std::optional<std::string> value) override;
 

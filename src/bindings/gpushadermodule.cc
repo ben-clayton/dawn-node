@@ -30,14 +30,14 @@ GPUShaderModule::compilationInfo(Napi::Env env) {
           UNIMPLEMENTED();
       }
     }
-    unsigned long long getLineNum(Napi::Env) override {
+    uint64_t getLineNum(Napi::Env) override {
       return message.lineNum;
     }
-    unsigned long long getLinePos(Napi::Env) override {
+    uint64_t getLinePos(Napi::Env) override {
       return message.linePos;
     }
-    unsigned long long getOffset(Napi::Env) override { return message.offset; }
-    unsigned long long getLength(Napi::Env) override { return message.length; }
+    uint64_t getOffset(Napi::Env) override { return message.offset; }
+    uint64_t getLength(Napi::Env) override { return message.length; }
   };
 
   using Messages =
