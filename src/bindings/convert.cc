@@ -36,6 +36,8 @@ bool Converter::Convert(wgpu::Extent3D& out, const interop::GPUExtent3D& in) {
       case 1:  // fallthrough
         out.width = (*vec)[0];
         return true;
+      case 0:
+        break;
     }
   }
   Napi::Error::New(env, "invalid value for GPUExtent3D")
@@ -73,6 +75,8 @@ bool Converter::Convert(wgpu::Color& out, const interop::GPUColor& in) {
       case 1:  // fallthrough
         out.r = (*vec)[0];
         return true;
+      case 0:
+        break;
     }
   }
   Napi::Error::New(env, "invalid value for GPUColor")
@@ -91,6 +95,8 @@ bool Converter::Convert(wgpu::Origin3D& out,
       out.y = in[1];
     case 1:  // fallthrough
       out.x = in[0];
+    case 0:
+      break;
   }
   return true;
 }
