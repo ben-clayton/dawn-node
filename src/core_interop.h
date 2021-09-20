@@ -231,20 +231,6 @@ class Serializer<uint64_t> {
 };
 
 template <>
-class Serializer<long long> {
- public:
-  static bool Unmarshal(Napi::Env, Napi::Value, long long&);
-  static Napi::Value Marshal(Napi::Env, long long);
-};
-
-template <>
-class Serializer<unsigned long long> {
- public:
-  static bool Unmarshal(Napi::Env, Napi::Value, unsigned long long&);
-  static Napi::Value Marshal(Napi::Env, unsigned long long);
-};
-
-template <>
 class Serializer<float> {
  public:
   static bool Unmarshal(Napi::Env, Napi::Value, float&);

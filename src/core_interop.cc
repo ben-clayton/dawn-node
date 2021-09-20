@@ -121,30 +121,6 @@ bool Serializer<uint64_t>::Unmarshal(Napi::Env env, Napi::Value value,
 Napi::Value Serializer<uint64_t>::Marshal(Napi::Env env, uint64_t value) {
   return Napi::Value::From(env, value);
 }
-bool Serializer<long long>::Unmarshal(Napi::Env env, Napi::Value value,
-                                      long long& out) {
-  if (value.IsNumber()) {
-    out = value.ToNumber().Int64Value();
-    return true;
-  }
-  return false;
-}
-Napi::Value Serializer<long long>::Marshal(Napi::Env env, long long value) {
-  return Napi::Value::From(env, value);
-}
-
-bool Serializer<unsigned long long>::Unmarshal(Napi::Env, Napi::Value value,
-                                               unsigned long long& out) {
-  if (value.IsNumber()) {
-    out = value.ToNumber().Uint32Value();  // No Uint64Value?
-    return true;
-  }
-  return false;
-}
-Napi::Value Serializer<unsigned long long>::Marshal(Napi::Env env,
-                                                    unsigned long long value) {
-  return Napi::Value::From(env, value);
-}
 
 bool Serializer<float>::Unmarshal(Napi::Env env, Napi::Value value,
                                   float& out) {

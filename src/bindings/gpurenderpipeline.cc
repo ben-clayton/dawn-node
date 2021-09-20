@@ -16,7 +16,7 @@ GPURenderPipeline::GPURenderPipeline(wgpu::RenderPipeline pipeline)
     : pipeline_(pipeline) {}
 
 interop::Interface<interop::GPUBindGroupLayout>
-GPURenderPipeline::getBindGroupLayout(Napi::Env env, unsigned long index) {
+GPURenderPipeline::getBindGroupLayout(Napi::Env env, uint32_t index) {
   return interop::GPUBindGroupLayout::Create<GPUBindGroupLayout>(
       env, pipeline_.GetBindGroupLayout(index));
 }

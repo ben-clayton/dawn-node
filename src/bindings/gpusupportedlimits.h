@@ -11,34 +11,34 @@ namespace bindings {
 
 class GPUSupportedLimits : public interop::GPUSupportedLimits {
  public:
-  unsigned long getMaxTextureDimension1D(Napi::Env) override;
-  unsigned long getMaxTextureDimension2D(Napi::Env) override;
-  unsigned long getMaxTextureDimension3D(Napi::Env) override;
-  unsigned long getMaxTextureArrayLayers(Napi::Env) override;
-  unsigned long getMaxBindGroups(Napi::Env) override;
-  unsigned long getMaxDynamicUniformBuffersPerPipelineLayout(
+  uint32_t getMaxTextureDimension1D(Napi::Env) override;
+  uint32_t getMaxTextureDimension2D(Napi::Env) override;
+  uint32_t getMaxTextureDimension3D(Napi::Env) override;
+  uint32_t getMaxTextureArrayLayers(Napi::Env) override;
+  uint32_t getMaxBindGroups(Napi::Env) override;
+  uint32_t getMaxDynamicUniformBuffersPerPipelineLayout(
       Napi::Env) override;
-  unsigned long getMaxDynamicStorageBuffersPerPipelineLayout(
+  uint32_t getMaxDynamicStorageBuffersPerPipelineLayout(
       Napi::Env) override;
-  unsigned long getMaxSampledTexturesPerShaderStage(Napi::Env) override;
-  unsigned long getMaxSamplersPerShaderStage(Napi::Env) override;
-  unsigned long getMaxStorageBuffersPerShaderStage(Napi::Env) override;
-  unsigned long getMaxStorageTexturesPerShaderStage(Napi::Env) override;
-  unsigned long getMaxUniformBuffersPerShaderStage(Napi::Env) override;
-  unsigned long long getMaxUniformBufferBindingSize(Napi::Env) override;
-  unsigned long long getMaxStorageBufferBindingSize(Napi::Env) override;
-  unsigned long getMinUniformBufferOffsetAlignment(Napi::Env) override;
-  unsigned long getMinStorageBufferOffsetAlignment(Napi::Env) override;
-  unsigned long getMaxVertexBuffers(Napi::Env) override;
-  unsigned long getMaxVertexAttributes(Napi::Env) override;
-  unsigned long getMaxVertexBufferArrayStride(Napi::Env) override;
-  unsigned long getMaxInterStageShaderComponents(Napi::Env) override;
-  unsigned long getMaxComputeWorkgroupStorageSize(Napi::Env) override;
-  unsigned long getMaxComputeInvocationsPerWorkgroup(Napi::Env) override;
-  unsigned long getMaxComputeWorkgroupSizeX(Napi::Env) override;
-  unsigned long getMaxComputeWorkgroupSizeY(Napi::Env) override;
-  unsigned long getMaxComputeWorkgroupSizeZ(Napi::Env) override;
-  unsigned long getMaxComputeWorkgroupsPerDimension(Napi::Env) override;
+  uint32_t getMaxSampledTexturesPerShaderStage(Napi::Env) override;
+  uint32_t getMaxSamplersPerShaderStage(Napi::Env) override;
+  uint32_t getMaxStorageBuffersPerShaderStage(Napi::Env) override;
+  uint32_t getMaxStorageTexturesPerShaderStage(Napi::Env) override;
+  uint32_t getMaxUniformBuffersPerShaderStage(Napi::Env) override;
+  uint64_t getMaxUniformBufferBindingSize(Napi::Env) override;
+  uint64_t getMaxStorageBufferBindingSize(Napi::Env) override;
+  uint32_t getMinUniformBufferOffsetAlignment(Napi::Env) override;
+  uint32_t getMinStorageBufferOffsetAlignment(Napi::Env) override;
+  uint32_t getMaxVertexBuffers(Napi::Env) override;
+  uint32_t getMaxVertexAttributes(Napi::Env) override;
+  uint32_t getMaxVertexBufferArrayStride(Napi::Env) override;
+  uint32_t getMaxInterStageShaderComponents(Napi::Env) override;
+  uint32_t getMaxComputeWorkgroupStorageSize(Napi::Env) override;
+  uint32_t getMaxComputeInvocationsPerWorkgroup(Napi::Env) override;
+  uint32_t getMaxComputeWorkgroupSizeX(Napi::Env) override;
+  uint32_t getMaxComputeWorkgroupSizeY(Napi::Env) override;
+  uint32_t getMaxComputeWorkgroupSizeZ(Napi::Env) override;
+  uint32_t getMaxComputeWorkgroupsPerDimension(Napi::Env) override;
 };
 
 }  // namespace bindings
