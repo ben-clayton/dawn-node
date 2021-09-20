@@ -17,13 +17,18 @@ GPUQueue::GPUQueue(wgpu::Queue queue, AsyncRunner async)
     : queue_(queue), async_(async) {}
 
 void GPUQueue::submit(
-    Napi::Env,
+    Napi::Env env,
     std::vector<interop::Interface<interop::GPUCommandBuffer>> commandBuffers) {
   std::vector<wgpu::CommandBuffer> bufs(commandBuffers.size());
   for (size_t i = 0; i < commandBuffers.size(); i++) {
     bufs[i] = *commandBuffers[i].As<GPUCommandBuffer>();
   }
-  queue_.Submit(bufs.size(), bufs.data());
+  Converter conv(env);
+  uint32_t bufs_size;
+  if (!conv(bufs_size, bufs.size())) {
+    return;
+  }
+  queue_.Submit(bufs_size, bufs.data());
 }
 
 interop::Promise<void> GPUQueue::onSubmittedWorkDone(Napi::Env env) {

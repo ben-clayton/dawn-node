@@ -79,7 +79,11 @@ void GPUComputePassEncoder::setBindGroup(
         return;
       }
     }
-    enc_.SetBindGroup(index, bg, offsets.size(), offsets.data());
+    uint32_t offsets_size;
+    if (!conv(offsets_size, offsets.size())) {
+        return;
+    }
+    enc_.SetBindGroup(index, bg, offsets_size, offsets.data());
   } else {
     enc_.SetBindGroup(index, bg);
   }

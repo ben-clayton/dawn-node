@@ -297,7 +297,7 @@ class Serializer<std::vector<T>> {
     auto arr = value.As<Napi::Array>();
     std::vector<T> vec(arr.Length());
     for (size_t i = 0; i < vec.size(); i++) {
-      if (!Serializer<T>::Unmarshal(env, arr[i], vec[i])) {
+      if (!Serializer<T>::Unmarshal(env, arr[static_cast<uint32_t>(i)], vec[i])) {
         return false;
       }
     }
@@ -307,7 +307,7 @@ class Serializer<std::vector<T>> {
   static inline Napi::Value Marshal(Napi::Env env, const std::vector<T>& vec) {
     auto arr = Napi::Array::New(env, vec.size());
     for (size_t i = 0; i < vec.size(); i++) {
-      arr.Set(i, Serializer<T>::Marshal(env, vec[i]));
+      arr.Set(static_cast<uint32_t>(i), Serializer<T>::Marshal(env, vec[i]));
     }
     return arr;
   }
@@ -324,7 +324,7 @@ class Serializer<std::unordered_map<K, V>> {
     auto obj = value.ToObject();
     auto keys = obj.GetPropertyNames();
     std::unordered_map<K, V> map(keys.Length());
-    for (size_t i = 0; i < map.size(); i++) {
+    for (uint32_t i = 0; i < static_cast<uint32_t>(map.size()); i++) {
       K key{};
       V value{};
       if (!Serializer<K>::Unmarshal(env, keys[i], key) ||
