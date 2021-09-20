@@ -26,29 +26,11 @@ set(DAWN_BUILD_EXAMPLES OFF)
 set(DAWN_THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
 set(DAWN_JINJA2_DIR "${DAWN_THIRD_PARTY_DIR}/jinja/src/jinja2")
 set(TINT_THIRD_PARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party")
-add_subdirectory(third_party/dawn ${CMAKE_BINARY_DIR}/dawn)
-
-################################################################################
-# Get the npm binary directory
-# execute_process(COMMAND npm bin
-#         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-#         OUTPUT_VARIABLE NPM_BIN
-# )
-# string(REPLACE "\n" "" NPM_BIN ${NPM_BIN})
-# string(REPLACE "\"" "" NPM_BIN ${NPM_BIN})
-################################################################################
-
-################################################################################
-# Include Node-API wrappers
-# execute_process(COMMAND node -p "require('node-addon-api').include"
-#         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-#         OUTPUT_VARIABLE NODE_ADDON_API_DIR
-# )
-# string(REPLACE "\n" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
-# string(REPLACE "\"" "" NODE_ADDON_API_DIR ${NODE_ADDON_API_DIR})
 set(NODE_ADDON_API_DIR   "${TINT_THIRD_PARTY_DIR}/node-addon-api")
 set(NODE_API_HEADERS_DIR "${TINT_THIRD_PARTY_DIR}/node-api-headers/include")
-################################################################################
+set(WEBGPU_IDL_PATH "${TINT_THIRD_PARTY_DIR}/gpuweb/webgpu.idl")
+
+add_subdirectory(third_party/dawn ${CMAKE_BINARY_DIR}/dawn)
 
 ################################################################################
 set(WEBGPU_INTEROP_DIR "${CMAKE_CURRENT_BINARY_DIR}/gen")
@@ -58,11 +40,13 @@ add_custom_command(
     COMMAND "go" "run" "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idl2cpp/main.go"
             "--template" "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop.h.tmpl"
             "--output" "${WEBGPU_INTEROP_H}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu.idl"
-    DEPENDS "src/webgpu.idl"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/browser.idl"
+            "${WEBGPU_IDL_PATH}"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/browser.idl"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop.h.tmpl"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop_common.tmpl"
             "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idl2cpp/main.go"
+            "${WEBGPU_IDL_PATH}"
     OUTPUT "${WEBGPU_INTEROP_H}"
     COMMENT "Generating ${WEBGPU_INTEROP_H}"
 )
@@ -70,11 +54,13 @@ add_custom_command(
     COMMAND "go" "run" "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idl2cpp/main.go"
             "--template" "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop.cc.tmpl"
             "--output" "${WEBGPU_INTEROP_CC}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu.idl"
-    DEPENDS "src/webgpu.idl"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/browser.idl"
+            "${WEBGPU_IDL_PATH}"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/browser.idl"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop.cc.tmpl"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop_common.tmpl"
             "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idl2cpp/main.go"
+            "${WEBGPU_IDL_PATH}"
     OUTPUT "${WEBGPU_INTEROP_CC}"
     COMMENT "Generating ${WEBGPU_INTEROP_CC}"
 )

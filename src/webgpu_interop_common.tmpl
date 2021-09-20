@@ -30,7 +30,8 @@
 {{- /**********************************************************************/ -}}
 
 {{- define "Literal" -}}
-{{-   if IsTypeName $.Type}}
+{{-   if      IsDefaultDictionaryLiteral $.Value}}{{template "Type" $.Type}}{}
+{{-   else if IsTypeName                 $.Type }}
 {{-     $ty := Lookup $.Type.Name}}
 {{-     if      IsEnum         $ty     }}{{$.Type.Name}}::{{EnumEntryName $.Value.Value}}
 {{-     else if IsBasicLiteral $.Value }}{{$.Value.Value}}

@@ -11,8 +11,8 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/gowebapi/webidlparser/ast"
-	"github.com/gowebapi/webidlparser/parser"
+	"github.com/ben-clayton/webidlparser/ast"
+	"github.com/ben-clayton/webidlparser/parser"
 )
 
 func main() {
@@ -44,63 +44,66 @@ func run() error {
 		return fmt.Errorf("failed to open template file '%v'", templatePath)
 	}
 
+	idl := &ast.File{}
+
 	idlFiles := flag.Args()
-	for _, idlFile := range idlFiles {
-		content, err := ioutil.ReadFile(idlFile)
+	for _, path := range idlFiles {
+		content, err := ioutil.ReadFile(path)
 		if err != nil {
-			return fmt.Errorf("failed to open file '%v'", idlFile)
+			return fmt.Errorf("failed to open file '%v'", path)
 		}
-		idlAST := parser.Parse(string(content))
-		if numErrs := len(idlAST.Errors); numErrs != 0 {
+		fileIDL := parser.Parse(string(content))
+		if numErrs := len(fileIDL.Errors); numErrs != 0 {
 			errs := make([]string, numErrs)
-			for i, e := range idlAST.Errors {
+			for i, e := range fileIDL.Errors {
 				errs[i] = e.Message
 			}
-			return fmt.Errorf("errors found while parsing %v:\n%v", idlFile, strings.Join(errs, "\n"))
+			return fmt.Errorf("errors found while parsing %v:\n%v", path, strings.Join(errs, "\n"))
 		}
-
-		generated := &strings.Builder{}
-		g := generator{t: template.New(templatePath)}
-		g.workingDir = filepath.Dir(templatePath)
-		g.funcs = map[string]interface{}{
-			"AttributesOf":       attributesOf,
-			"ConstantsOf":        constantsOf,
-			"EnumEntryName":      enumEntryName,
-			"Eval":               g.eval,
-			"Include":            g.include,
-			"IsBasicLiteral":     is(ast.BasicLiteral{}),
-			"IsConstructor":      isConstructor,
-			"IsDictionary":       is(ast.Dictionary{}),
-			"IsEnum":             is(ast.Enum{}),
-			"IsInterface":        is(ast.Interface{}),
-			"IsMember":           is(ast.Member{}),
-			"IsNullableType":     is(ast.NullableType{}),
-			"IsParametrizedType": is(ast.ParametrizedType{}),
-			"IsRecordType":       is(ast.RecordType{}),
-			"IsSequenceType":     is(ast.SequenceType{}),
-			"IsTypedef":          is(ast.Typedef{}),
-			"IsTypeName":         is(ast.TypeName{}),
-			"IsUndefinedType":    isUndefinedType,
-			"IsUnionType":        is(ast.UnionType{}),
-			"Lookup":             g.lookup,
-			"MethodsOf":          methodsOf,
-			"Title":              strings.Title,
-		}
-		t, err := g.t.
-			Option("missingkey=invalid").
-			Funcs(g.funcs).
-			Parse(string(tmpl))
-		if err != nil {
-			return fmt.Errorf("failed to parse template file '%v': %w", templatePath, err)
-		}
-		idlAST, declarations := sanitize(idlAST)
-		g.declarations = declarations
-		if err := t.Execute(generated, idlAST); err != nil {
-			return err
-		}
-		fmt.Fprint(out, generated.String())
+		idl.Declarations = append(idl.Declarations, fileIDL.Declarations...)
 	}
 
+	generated := &strings.Builder{}
+	g := generator{t: template.New(templatePath)}
+	g.workingDir = filepath.Dir(templatePath)
+	g.funcs = map[string]interface{}{
+		"AttributesOf":               attributesOf,
+		"ConstantsOf":                constantsOf,
+		"EnumEntryName":              enumEntryName,
+		"Eval":                       g.eval,
+		"Include":                    g.include,
+		"IsBasicLiteral":             is(ast.BasicLiteral{}),
+		"IsConstructor":              isConstructor,
+		"IsDefaultDictionaryLiteral": is(ast.DefaultDictionaryLiteral{}),
+		"IsDictionary":               is(ast.Dictionary{}),
+		"IsEnum":                     is(ast.Enum{}),
+		"IsInterface":                is(ast.Interface{}),
+		"IsMember":                   is(ast.Member{}),
+		"IsNullableType":             is(ast.NullableType{}),
+		"IsParametrizedType":         is(ast.ParametrizedType{}),
+		"IsRecordType":               is(ast.RecordType{}),
+		"IsSequenceType":             is(ast.SequenceType{}),
+		"IsTypedef":                  is(ast.Typedef{}),
+		"IsTypeName":                 is(ast.TypeName{}),
+		"IsUndefinedType":            isUndefinedType,
+		"IsUnionType":                is(ast.UnionType{}),
+		"Lookup":                     g.lookup,
+		"MethodsOf":                  methodsOf,
+		"Title":                      strings.Title,
+	}
+	t, err := g.t.
+		Option("missingkey=invalid").
+		Funcs(g.funcs).
+		Parse(string(tmpl))
+	if err != nil {
+		return fmt.Errorf("failed to parse template file '%v': %w", templatePath, err)
+	}
+	idl, declarations := sanitize(idl)
+	g.declarations = declarations
+	if err := t.Execute(generated, idl); err != nil {
+		return err
+	}
+	fmt.Fprint(out, generated.String())
 	return nil
 }
 
