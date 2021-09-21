@@ -39,7 +39,7 @@ set(WEBGPU_INTEROP_DIR "${CMAKE_CURRENT_BINARY_DIR}/gen")
 set(WEBGPU_INTEROP_H "${WEBGPU_INTEROP_DIR}/webgpu_interop.h")
 set(WEBGPU_INTEROP_CC "${WEBGPU_INTEROP_DIR}/webgpu_interop.cc")
 add_custom_command(
-    COMMAND "go" "run" "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idl2cpp/main.go"
+    COMMAND "go" "run" "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idlgen/main.go"
             "--template" "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop.h.tmpl"
             "--output" "${WEBGPU_INTEROP_H}"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/browser.idl"
@@ -47,13 +47,13 @@ add_custom_command(
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/browser.idl"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop.h.tmpl"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop_common.tmpl"
-            "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idl2cpp/main.go"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idlgen/main.go"
             "${WEBGPU_IDL_PATH}"
     OUTPUT "${WEBGPU_INTEROP_H}"
     COMMENT "Generating ${WEBGPU_INTEROP_H}"
 )
 add_custom_command(
-    COMMAND "go" "run" "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idl2cpp/main.go"
+    COMMAND "go" "run" "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idlgen/main.go"
             "--template" "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop.cc.tmpl"
             "--output" "${WEBGPU_INTEROP_CC}"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/browser.idl"
@@ -61,7 +61,7 @@ add_custom_command(
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/browser.idl"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop.cc.tmpl"
             "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop_common.tmpl"
-            "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idl2cpp/main.go"
+            "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idlgen/main.go"
             "${WEBGPU_IDL_PATH}"
     OUTPUT "${WEBGPU_INTEROP_CC}"
     COMMENT "Generating ${WEBGPU_INTEROP_CC}"
