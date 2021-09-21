@@ -127,7 +127,10 @@ Napi::Value Serializer<int64_t>::Marshal(Napi::Env env, int64_t value) {
 bool Serializer<uint64_t>::Unmarshal(Napi::Env env, Napi::Value value,
                                      uint64_t& out) {
   if (value.IsNumber()) {
-    out = value.ToNumber().Uint32Value();  // No Uint64Value?
+    // Note that the JS Number type only stores doubles, so the max integer
+    // range of values without precision loss is -2^53 to 2^53 (52 bit mantissa
+    // with 1 implicit bit). This is why there's no UInt64Value() function.
+    out = static_cast<uint64_t>(value.ToNumber().Int64Value());
     return true;
   }
   return false;
