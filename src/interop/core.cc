@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/core_interop.h"
+#include "src/interop/core.h"
 
 namespace wgpu {
 namespace interop {

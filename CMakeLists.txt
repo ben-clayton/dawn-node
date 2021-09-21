@@ -35,36 +35,36 @@ set(WEBGPU_IDL_PATH "${TINT_THIRD_PARTY_DIR}/gpuweb/webgpu.idl")
 add_subdirectory(third_party/dawn ${CMAKE_BINARY_DIR}/dawn)
 
 ################################################################################
-set(WEBGPU_INTEROP_DIR "${CMAKE_CURRENT_BINARY_DIR}/gen")
-set(WEBGPU_INTEROP_H "${WEBGPU_INTEROP_DIR}/webgpu_interop.h")
-set(WEBGPU_INTEROP_CC "${WEBGPU_INTEROP_DIR}/webgpu_interop.cc")
+set(GEN_DIR "${CMAKE_CURRENT_BINARY_DIR}/gen")
+set(INTEROP_WEBGPU_H  "${GEN_DIR}/interop/webgpu.h")
+set(INTEROP_WEBGPU_CC "${GEN_DIR}/interop/webgpu.cc")
 add_custom_command(
     COMMAND "go" "run" "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idlgen/main.go"
-            "--template" "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop.h.tmpl"
-            "--output" "${WEBGPU_INTEROP_H}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/browser.idl"
+            "--template" "${CMAKE_CURRENT_SOURCE_DIR}/src/interop/webgpu.h.tmpl"
+            "--output" "${INTEROP_WEBGPU_H}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/interop/browser.idl"
             "${WEBGPU_IDL_PATH}"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/browser.idl"
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop.h.tmpl"
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop_common.tmpl"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/interop/browser.idl"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/interop/webgpu.h.tmpl"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/interop/webgpu_common.tmpl"
             "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idlgen/main.go"
             "${WEBGPU_IDL_PATH}"
-    OUTPUT "${WEBGPU_INTEROP_H}"
-    COMMENT "Generating ${WEBGPU_INTEROP_H}"
+    OUTPUT "${INTEROP_WEBGPU_H}"
+    COMMENT "Generating ${INTEROP_WEBGPU_H}"
 )
 add_custom_command(
     COMMAND "go" "run" "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idlgen/main.go"
-            "--template" "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop.cc.tmpl"
-            "--output" "${WEBGPU_INTEROP_CC}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/browser.idl"
+            "--template" "${CMAKE_CURRENT_SOURCE_DIR}/src/interop/webgpu.cc.tmpl"
+            "--output" "${INTEROP_WEBGPU_CC}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/interop/browser.idl"
             "${WEBGPU_IDL_PATH}"
-    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/browser.idl"
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop.cc.tmpl"
-            "${CMAKE_CURRENT_SOURCE_DIR}/src/webgpu_interop_common.tmpl"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/interop/browser.idl"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/interop/webgpu.cc.tmpl"
+            "${CMAKE_CURRENT_SOURCE_DIR}/src/interop/webgpu_common.tmpl"
             "${CMAKE_CURRENT_SOURCE_DIR}/tools/cmd/idlgen/main.go"
             "${WEBGPU_IDL_PATH}"
-    OUTPUT "${WEBGPU_INTEROP_CC}"
-    COMMENT "Generating ${WEBGPU_INTEROP_CC}"
+    OUTPUT "${INTEROP_WEBGPU_CC}"
+    COMMENT "Generating ${INTEROP_WEBGPU_CC}"
 )
 ################################################################################
 
@@ -122,11 +122,11 @@ set(SRC_FILES
     "src/bindings/gputexture.h"
     "src/bindings/gputextureview.cc"
     "src/bindings/gputextureview.h"
-    "src/core_interop.cc"
-    "src/core_interop.h"
-    "src/webgpu_bindings.cc"
-    "${WEBGPU_INTEROP_H}"
-    "${WEBGPU_INTEROP_CC}"
+    "src/interop/core.cc"
+    "src/interop/core.h"
+    "src/webgpu.cc"
+    "${INTEROP_WEBGPU_H}"
+    "${INTEROP_WEBGPU_CC}"
 )
 add_library(${PROJECT_NAME} SHARED ${SRC_FILES} ${CMAKE_JS_SRC})
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "" SUFFIX ".node")
@@ -136,5 +136,5 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${NODE_API_HEADERS_DIR}
     ${NODE_ADDON_API_DIR}
     ${WEBIDL_SRC}
-    ${WEBGPU_INTEROP_DIR}
+    ${GEN_DIR}
 )

@@ -15,7 +15,7 @@
 #ifndef DAWN_NODE_SRC_ERRORS_H_
 #define DAWN_NODE_SRC_ERRORS_H_
 
-#include "webgpu_interop.h"
+#include "interop/webgpu.h"
 
 namespace wgpu {
 namespace bindings {

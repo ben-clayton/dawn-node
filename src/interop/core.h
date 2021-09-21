@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWN_NODE_SRC_BIND_CORE_H_
-#define DAWN_NODE_SRC_BIND_CORE_H_
+#ifndef DAWN_NODE_SRC_INTEROP_CORE_WEBGPU_H_
+#define DAWN_NODE_SRC_INTEROP_CORE_WEBGPU_H_
 
 #include <stdint.h>
 
@@ -447,4 +447,4 @@ inline bool UnmarshalArgs(const Napi::CallbackInfo& info, TUPLE_ARGS& args) {
 }  // namespace interop
 }  // namespace wgpu
 
-#endif  //  DAWN_NODE_SRC_BIND_CORE_H_
+#endif  //  DAWN_NODE_SRC_INTEROP_CORE_WEBGPU_H_

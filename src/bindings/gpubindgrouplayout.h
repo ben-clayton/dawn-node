@@ -17,8 +17,8 @@
 
 #include "dawn/webgpu_cpp.h"
 #include "dawn_native/DawnNative.h"
+#include "interop/webgpu.h"
 #include "napi.h"
-#include "webgpu_interop.h"
 
 namespace wgpu {
 namespace bindings {

@@ -14,12 +14,12 @@
  limitations under the License.
 */}}
 
-{{- Include "webgpu_interop_common.tmpl" -}}
+{{- Include "webgpu_common.tmpl" -}}
 
-#ifndef DAWN_NODE_GEN_WEBGPU_INTEROP_H_
-#define DAWN_NODE_GEN_WEBGPU_INTEROP_H_
+#ifndef DAWN_NODE_GEN_INTEROP_WEBGPU_H_
+#define DAWN_NODE_GEN_INTEROP_WEBGPU_H_
 
-#include "src/core_interop.h"
+#include "src/interop/core.h"
 
 namespace wgpu {
 namespace interop {
@@ -42,7 +42,7 @@ Napi::Object InitWebGPUInterfaces(Napi::Env env, Napi::Object exports);
 }  // namespace interop
 }  // namespace wgpu
 
-#endif // DAWN_NODE_GEN_WEBGPU_INTEROP_H_
+#endif // DAWN_NODE_GEN_INTEROP_WEBGPU_H_
 
 {{- /**********************************************************************/ -}}
 

@@ -19,9 +19,9 @@
 #include "dawn/webgpu_cpp.h"
 #include "dawn/webgpu_cpp_print.h"
 #include "dawn_native/DawnNative.h"
+#include "interop/webgpu.h"
 #include "napi.h"
 #include "src/bindings/gpu.h"
-#include "webgpu_interop.h"
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   dawnProcSetProcs(&dawn_native::GetProcs());
