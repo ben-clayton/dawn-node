@@ -38,6 +38,7 @@ interop::Promise<void> GPUQueue::onSubmittedWorkDone(Napi::Env env) {
     AsyncTask task;
   };
   auto ctx = new Context{env, interop::Promise<void>(env), async_};
+  auto promise = ctx->promise;
 
   queue_.OnSubmittedWorkDone(
       0,
@@ -53,7 +54,7 @@ interop::Promise<void> GPUQueue::onSubmittedWorkDone(Napi::Env env) {
       },
       ctx);
 
-  return ctx->promise;
+  return promise;
 }
 
 void GPUQueue::writeBuffer(Napi::Env env,

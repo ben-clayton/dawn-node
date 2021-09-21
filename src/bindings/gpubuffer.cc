@@ -48,6 +48,7 @@ interop::Promise<void> GPUBuffer::mapAsync(
     State& state;
   };
   auto ctx = new Context{env, interop::Promise<void>(env), async_, state_};
+  auto promise = ctx->promise;
 
   uint64_t o = offset.has_value() ? offset.value() : 0;
   uint64_t s = size.has_value() ? size.value() : (desc_.size - o);
@@ -86,7 +87,7 @@ interop::Promise<void> GPUBuffer::mapAsync(
       },
       ctx);
 
-  return ctx->promise;
+  return promise;
 }
 
 interop::ArrayBuffer GPUBuffer::getMappedRange(
