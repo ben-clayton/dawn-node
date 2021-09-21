@@ -71,6 +71,7 @@ GPUShaderModule::compilationInfo(Napi::Env env) {
     AsyncTask task;
   };
   auto ctx = new Context{env, env, async_};
+  auto promise = ctx->promise;
 
   shader_.GetCompilationInfo(
       [](WGPUCompilationInfoRequestStatus status,
@@ -92,7 +93,7 @@ GPUShaderModule::compilationInfo(Napi::Env env) {
       },
       ctx);
 
-  return ctx->promise;
+  return promise;
 }
 
 std::optional<std::string> GPUShaderModule::getLabel(Napi::Env) {

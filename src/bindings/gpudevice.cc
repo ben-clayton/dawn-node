@@ -277,6 +277,7 @@ GPUDevice::createComputePipelineAsync(
     AsyncTask task;
   };
   auto ctx = new Context{env, env, async_};
+  auto promise = ctx->promise;
 
   device_.CreateComputePipelineAsync(
       &desc,
@@ -300,7 +301,7 @@ GPUDevice::createComputePipelineAsync(
       },
       ctx);
 
-  return ctx->promise;
+  return promise;
 }
 
 interop::Promise<interop::Interface<interop::GPURenderPipeline>>
@@ -322,6 +323,7 @@ GPUDevice::createRenderPipelineAsync(
     AsyncTask task;
   };
   auto ctx = new Context{env, env, async_};
+  auto promise = ctx->promise;
 
   device_.CreateRenderPipelineAsync(
       &desc,
@@ -345,7 +347,7 @@ GPUDevice::createRenderPipelineAsync(
       },
       ctx);
 
-  return ctx->promise;
+  return promise;
 }
 
 interop::Interface<interop::GPUCommandEncoder> GPUDevice::createCommandEncoder(
@@ -425,6 +427,7 @@ interop::Promise<std::optional<interop::GPUError>> GPUDevice::popErrorScope(
     AsyncTask task;
   };
   auto* ctx = new Context{env, env, async_};
+  auto promise = ctx->promise;
 
   bool ok = device_.PopErrorScope(
       [](WGPUErrorType type, char const* message, void* userdata) {
@@ -454,7 +457,7 @@ interop::Promise<std::optional<interop::GPUError>> GPUDevice::popErrorScope(
       ctx);
 
   if (ok) {
-    return ctx->promise;
+    return promise;
   }
 
   delete ctx;
