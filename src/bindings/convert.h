@@ -250,6 +250,10 @@ class Converter {
                                         std::is_integral_v<OUT>>>
   inline bool Convert(OUT& out, const IN& in) {
     out = static_cast<OUT>(in);
+    if (static_cast<IN>(out) != in) {
+        Errors::OperationError(env).ThrowAsJavaScriptException();
+        return false;
+    }
     return true;
   }
 
@@ -301,8 +305,7 @@ class Converter {
       }
     }
     out_els = els;
-    out_count = in.size();
-    return true;
+    return Convert(out_count, in.size());
   }
 
  private:
