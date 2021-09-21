@@ -942,7 +942,7 @@ bool Converter::Convert(wgpu::LoadOp& out, const interop::GPULoadOp& in) {
 }
 
 bool Converter::Convert(wgpu::StoreOp& out, const interop::GPUStoreOp& in) {
-  out = wgpu::StoreOp::Clear;
+  out = wgpu::StoreOp::Store;
   switch (in) {
     case interop::GPUStoreOp::kStore:
       out = wgpu::StoreOp::Store;
@@ -1190,7 +1190,7 @@ bool Converter::Convert(wgpu::ComputePipelineDescriptor& out,
   }
   return Convert(out.label, in.label) &&     //
          Convert(out.layout, *in.layout) &&  //
-         Convert(out.computeStage, in.compute);
+         Convert(out.compute, in.compute);
 }
 
 bool Converter::Convert(wgpu::RenderPipelineDescriptor& out,

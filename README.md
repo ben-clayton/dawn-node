@@ -5,10 +5,12 @@
 git submodule update --init
 ```
 
-## Apply WIP CMake changes to Dawn and Tint
+## Apply WIP CMake change to Dawn
 
-* dawn: https://dawn-review.googlesource.com/c/dawn/+/64482
-* tint: https://dawn-review.googlesource.com/c/tint/+/64500
+```bash
+cd third_party/dawn
+git fetch https://dawn.googlesource.com/dawn refs/changes/43/64743/1 && git checkout FETCH_HEAD
+```
 
 ## Building
 

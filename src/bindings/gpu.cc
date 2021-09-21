@@ -11,7 +11,14 @@ namespace bindings {
 ////////////////////////////////////////////////////////////////////////////////
 // wgpu::bindings::GPU
 ////////////////////////////////////////////////////////////////////////////////
-GPU::GPU() { instance_.DiscoverDefaultAdapters(); }
+GPU::GPU() {
+  // TODO: Disable in 'release'
+  instance_.EnableBackendValidation(true);
+  instance_.SetBackendValidationLevel(
+      dawn_native::BackendValidationLevel::Full);
+
+  instance_.DiscoverDefaultAdapters();
+}
 
 interop::Promise<std::optional<interop::Interface<interop::GPUAdapter>>>
 GPU::requestAdapter(Napi::Env env,

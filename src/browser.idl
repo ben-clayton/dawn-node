@@ -16,7 +16,7 @@ interface Navigator {
 interface Event {
   readonly attribute boolean bubbles;
   readonly attribute boolean cancelable;
-  attribute boolean returnValue;  // legacy
+  attribute boolean returnValue;
 };
 
 interface WorkerNavigator{};
