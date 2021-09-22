@@ -20,6 +20,9 @@
 
 #include "dawn/webgpu_cpp_print.h"
 
+namespace wgpu {
+namespace utils {
+
 [[noreturn]] inline void Unimplemented(const char* file, int line,
                                        const char* feature) {
   std::cout << file << ":" << line << ": "
@@ -100,10 +103,14 @@ inline std::ostream& Write(std::ostream& out, FIRST&& first, SECOND&& second,
 }
 
 #define LOG(...)                                                               \
-  Write(                                                                       \
+  ::wgpu::utils::Write(                                                        \
       std::cout << __FILE__ << ":" << __LINE__ << " " << __FUNCTION__ << ": ", \
       ##__VA_ARGS__)                                                           \
       << std::endl
-#define UNIMPLEMENTED() Unimplemented(__FILE__, __LINE__, __FUNCTION__)
+#define UNIMPLEMENTED() \
+  ::wgpu::utils::Unimplemented(__FILE__, __LINE__, __FUNCTION__)
+
+}  // namespace utils
+}  // namespace wgpu
 
 #endif  // DAWN_NODE_SRC_UTILS_LOG_H_
