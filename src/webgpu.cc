@@ -14,29 +14,30 @@
 
 #include "interop/webgpu.h"
 
-#include <cassert>
-#include <iostream>
-
 #include "dawn/dawn_proc.h"
-#include "dawn/webgpu_cpp.h"
-#include "dawn/webgpu_cpp_print.h"
-#include "dawn_native/DawnNative.h"
-#include "napi.h"
 #include "src/bindings/gpu.h"
 
-Napi::Object Init(Napi::Env env, Napi::Object exports) {
+// Initialize() initializes the Dawn node module, registering all the WebGPU
+// types and the 'navigator' global.
+Napi::Object Initialize(Napi::Env env, Napi::Object exports) {
+  // Begin by setting the Dawn procedure function pointers.
   dawnProcSetProcs(&dawn_native::GetProcs());
 
+  // Register all the interop types
   wgpu::interop::Initialize(env);
 
-  auto navigator = Napi::Object::New(env);
-
+  // Construct a wgpu::interop::GPU interface, implemented by
+  // wgpu::bindings::GPU. This will be the 'gpu' field of the global 'navigator'
+  // object.
   auto gpu = wgpu::interop::GPU::Create<wgpu::bindings::GPU>(env);
 
+  // Construct the 'navigator' object, assign the 'gpu' field, and expose as a
+  // global.
+  auto navigator = Napi::Object::New(env);
   navigator.Set(Napi::String::New(env, "gpu"), gpu);
   env.Global().Set(Napi::String::New(env, "navigator"), navigator);
 
-  return exports;
+  return exports;  // Note: The module does not actually export anything.
 }
 
-NODE_API_MODULE(addon, Init)
+NODE_API_MODULE(addon, Initialize)
