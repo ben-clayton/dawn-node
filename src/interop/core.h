@@ -44,6 +44,7 @@ namespace interop {
 ////////////////////////////////////////////////////////////////////////////////
 // Primitive JavaScript types
 ////////////////////////////////////////////////////////////////////////////////
+using Object = Napi::Object;
 using ArrayBuffer = Napi::ArrayBuffer;
 using Int8Array = Napi::TypedArrayOf<int8_t>;
 using Int16Array = Napi::TypedArrayOf<int16_t>;
@@ -54,6 +55,9 @@ using Uint32Array = Napi::TypedArrayOf<uint32_t>;
 using Float32Array = Napi::TypedArrayOf<float>;
 using Float64Array = Napi::TypedArrayOf<double>;
 using DataView = Napi::TypedArray;
+
+template <typename T>
+using FrozenArray = std::vector<T>;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Interface<T>

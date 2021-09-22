@@ -24,12 +24,8 @@
 namespace wgpu {
 namespace interop {
 
-template<typename T>
-using FrozenArray = std::vector<T>;
-
-using Object = Napi::Object;
-
-Napi::Object InitWebGPUInterfaces(Napi::Env env, Napi::Object exports);
+// Initialize() registers the WebGPU types with the Napi environment.
+void Initialize(Napi::Env env);
 
 {{  range $ := .Declarations}}
 {{-        if IsDictionary $}}{{template "Dictionary" $}}

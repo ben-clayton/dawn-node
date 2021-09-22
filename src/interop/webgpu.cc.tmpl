@@ -39,7 +39,7 @@ namespace {
 {{- end}}
 
 
-Napi::Object InitWebGPUInterfaces(Napi::Env env, Napi::Object exports) {
+void Initialize(Napi::Env env) {
   auto* wrapper = Wrappers::Init(env);
   auto global = env.Global();
 {{ range $ := .Declarations}}
@@ -47,7 +47,6 @@ Napi::Object InitWebGPUInterfaces(Napi::Env env, Napi::Object exports) {
   global.Set(Napi::String::New(env, "{{$.Name}}"), wrapper->{{$.Name}}_ctor.Value());
 {{-   end}}
 {{- end}}
-  return exports;
 }
 
 }  // namespace interop

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "interop/webgpu.h"
+
 #include <cassert>
 #include <iostream>
 
@@ -19,14 +21,13 @@
 #include "dawn/webgpu_cpp.h"
 #include "dawn/webgpu_cpp_print.h"
 #include "dawn_native/DawnNative.h"
-#include "interop/webgpu.h"
 #include "napi.h"
 #include "src/bindings/gpu.h"
 
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   dawnProcSetProcs(&dawn_native::GetProcs());
 
-  wgpu::interop::InitWebGPUInterfaces(env, exports);
+  wgpu::interop::Initialize(env);
 
   auto navigator = Napi::Object::New(env);
 
