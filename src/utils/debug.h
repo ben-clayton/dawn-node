@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef DAWN_NODE_SRC_UTILS_LOG_H_
-#define DAWN_NODE_SRC_UTILS_LOG_H_
+#ifndef DAWN_NODE_SRC_UTILS_DEBUG_H_
+#define DAWN_NODE_SRC_UTILS_DEBUG_H_
 
 #include <iostream>
 #include <optional>
@@ -23,13 +23,12 @@
 namespace wgpu {
 namespace utils {
 
-[[noreturn]] inline void Unimplemented(const char* file, int line,
-                                       const char* feature) {
-  std::cout << file << ":" << line << ": "
-            << "UNIMPLEMENTED : " << feature << std::endl;
-  abort();
-}
+////////////////////////////////////////////////////////////////////////////////
+// Write() is a helper for printing container types to the std::ostream.
+// Write() is used by the LOG() macro below.
+////////////////////////////////////////////////////////////////////////////////
 
+// Forward declarations
 inline std::ostream& Write(std::ostream& out) { return out; }
 template <typename T>
 inline std::ostream& Write(std::ostream& out, const std::optional<T>& value);
@@ -44,6 +43,7 @@ inline std::ostream& Write(std::ostream& out,
 template <typename VALUE>
 inline std::ostream& Write(std::ostream& out, const VALUE& value);
 
+// Write() implementations
 template <typename T>
 std::ostream& Write(std::ostream& out, const std::optional<T>& value) {
   if (value.has_value()) {
@@ -102,15 +102,35 @@ inline std::ostream& Write(std::ostream& out, FIRST&& first, SECOND&& second,
   return out;
 }
 
+////////////////////////////////////////////////////////////////////////////////
+
+// Unimplemented() prints an 'UNIMPLEMENTED' message to stdout with the given
+// file, line and function, then calls abort().
+// Unimplemented() is usually not called directly, but by the UNIMPLEMENTED()
+// macro below.
+[[noreturn]] inline void Unimplemented(const char* file, int line,
+                                       const char* function) {
+  std::cout << file << ":" << line << ": "
+            << "UNIMPLEMENTED : " << function << std::endl;
+  abort();
+}
+
+// LOG() prints the current file, line and function to stdout, followed by a
+// string representation of all the variadic arguments.
 #define LOG(...)                                                               \
   ::wgpu::utils::Write(                                                        \
       std::cout << __FILE__ << ":" << __LINE__ << " " << __FUNCTION__ << ": ", \
       ##__VA_ARGS__)                                                           \
       << std::endl
+
+// UNIMPLEMENTED() prints 'UNIMPLEMENTED' with the current file, line and
+// function to stdout, then calls abort().
+// The macro calls Unimplemented(), which is annotated with [[noreturn]].
+// Used to stub code that has not yet been implemented.
 #define UNIMPLEMENTED() \
   ::wgpu::utils::Unimplemented(__FILE__, __LINE__, __FUNCTION__)
 
 }  // namespace utils
 }  // namespace wgpu
 
-#endif  // DAWN_NODE_SRC_UTILS_LOG_H_
+#endif  // DAWN_NODE_SRC_UTILS_DEBUG_H_
