@@ -14,8 +14,7 @@ from timeit import default_timer as timer
 # Tweakables - TODO: make args
 proc_pool_size = 10 #mp.cpu_count()
 test_timeout_sec = 60*5
-dawnnode_module = 'build/dawnnode.node'
-# dawnnode_module = 'build/RelWithDebInfo/dawnnode.node'
+dawnnode_module = 'build/dawnnode.node' if not os.name == 'nt' else 'build/RelWithDebInfo/dawnnode.node'
 all_tests_file = 'all_tests.txt'
 # all_tests_file = 'single_test.txt'
 gpuweb_cts_rel_dir = '../gpuweb-cts'
@@ -95,7 +94,8 @@ def compile_gpuweb_cts():
     if not Path(gpuweb_cts_dir).exists():
         raise Exception(f"gpuweb-cts directory not found at '{gpuweb_cts_dir}'")
     print('Compiling gpuweb-cts')
-    output = run_process(['npx', 'grunt', 'run:build-out-node'], gpuweb_cts_dir)
+    npx = 'npx.cmd' if os.name == 'nt' else 'npx'
+    output = run_process([npx, 'grunt', 'run:build-out-node'], gpuweb_cts_dir)
     print(output) # TODO: get return code and fail on non-zero
 
     cmdline_js = Path(f'{gpuweb_cts_dir}/out-node/common/runtime/cmdline.js')
