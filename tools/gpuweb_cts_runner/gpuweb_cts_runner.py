@@ -27,13 +27,18 @@ gpuweb_cts_dir = (dawnnode_dir / gpuweb_cts_rel_dir).resolve()
 run_dawn_node_js = script_dir / 'run-dawn-node.js'
 all_tests_path = script_dir / all_tests_file
 
-def start_test_process(test_name, timeout_sec = 0):
-    cmd_args = ['node', str(run_dawn_node_js), '--verbose', test_name]
+
+def run_process(cmd_args, cwd=None, timeout_sec=None):
     try:
-        output = check_output(args=cmd_args, timeout=timeout_sec, stderr=subprocess.STDOUT, text=True, cwd=gpuweb_cts_dir)
+        output = check_output(args=cmd_args, timeout=timeout_sec, stderr=subprocess.STDOUT, text=True, cwd=cwd)
         return output
     except CalledProcessError as cpe:
         return cpe.output
+
+
+def start_test_process(test_name, timeout_sec):
+    cmd_args = ['node', str(run_dawn_node_js), '--verbose', test_name]
+    return run_process(cmd_args, gpuweb_cts_dir, timeout_sec)
 
 
 def run_test(test_name, results):
@@ -86,22 +91,33 @@ def to_unix(p):
     return str(p).replace('\\', '/')
 
 
-def generate_run_dawnnode_js(dawnnode_module):
-    with open(run_dawn_node_js, 'w') as f:
-        source = f"""
-        require('{dawnnode_dir}/{dawnnode_module}')
-        require('{gpuweb_cts_dir}/src/common/tools/setup-ts-in-node.js');
-        require('{gpuweb_cts_dir}/src/common/runtime/cmdline.ts');
-        """
-        f.write(to_unix(source))
+def compile_gpuweb_cts():
+    if not Path(gpuweb_cts_dir).exists():
+        raise Exception(f"gpuweb-cts directory not found at '{gpuweb_cts_dir}'")
+    print('Compiling gpuweb-cts')
+    output = run_process(['npx', 'grunt', 'run:build-out-node'], gpuweb_cts_dir)
+    print(output) # TODO: get return code and fail on non-zero
 
+    cmdline_js = Path(f'{gpuweb_cts_dir}/out-node/common/runtime/cmdline.js')
+    if not cmdline_js.exists():
+        raise Exception(f"Compiled js file not found at '{cmdline_js}'")
+
+
+def generate_run_dawnnode_js():
+    source = f"""
+    require('{dawnnode_dir}/{dawnnode_module}')
+    require('{gpuweb_cts_dir}/out-node/common/runtime/cmdline.js');
+    """
+    with open(run_dawn_node_js, 'w') as f:
+        f.write(to_unix(source))
 
 def main():
     start_time = timer()
 
     os.chdir(sys.path[0]) # Run in script dir
 
-    generate_run_dawnnode_js(dawnnode_module)
+    compile_gpuweb_cts()
+    generate_run_dawnnode_js()
 
     all_tests = []
     with open(all_tests_path, 'r') as f:
