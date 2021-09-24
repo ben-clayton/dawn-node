@@ -1,0 +1,1 @@
+webgpu:api,operation,rendering,blending:GPUBlendComponent:component="alpha";srcFactor="src-alpha-saturated";dstFactor="src-alpha";operation="min"
