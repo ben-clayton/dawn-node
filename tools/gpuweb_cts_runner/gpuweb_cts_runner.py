@@ -11,18 +11,19 @@ import signal
 from pathlib import Path, PurePosixPath
 from timeit import default_timer as timer
 
-# Tweakables
+# Tweakables - TODO: make args
 proc_pool_size = 10 #mp.cpu_count()
 test_timeout_sec = 60*5
 dawnnode_module = 'build/dawnnode.node'
 # dawnnode_module = 'build/RelWithDebInfo/dawnnode.node'
 all_tests_file = 'all_tests.txt'
 # all_tests_file = 'single_test.txt'
+gpuweb_cts_rel_dir = '../gpuweb-cts'
 
 
 script_dir = Path(__file__).resolve().parent
-gpuweb_cts_dir = script_dir.joinpath('../../../gpuweb-cts').resolve()
 dawnnode_dir = script_dir.parent.parent.resolve()
+gpuweb_cts_dir = (dawnnode_dir / gpuweb_cts_rel_dir).resolve()
 run_dawn_node_js = script_dir / 'run-dawn-node.js'
 all_tests_path = script_dir / all_tests_file
 
