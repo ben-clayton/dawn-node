@@ -28,9 +28,7 @@ run_dawn_node_js = script_dir / 'run-dawn-node.js'
 all_tests_path = script_dir / all_tests_file
 
 def start_test_process(test_name, timeout_sec = 0):
-    if os.name == 'nt':
-        test_name = test_name.replace(r'"', r'\"') # Escape quotes or shell won't be happy
-    cmd_args = ['node', run_dawn_node_js, '--verbose', test_name]
+    cmd_args = ['node', str(run_dawn_node_js), '--verbose', test_name]
     try:
         output = check_output(args=cmd_args, timeout=timeout_sec, stderr=subprocess.STDOUT, text=True, cwd=gpuweb_cts_dir)
         return output
