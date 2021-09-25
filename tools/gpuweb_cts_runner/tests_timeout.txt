@@ -1,2 +1,3 @@
-webgpu:api,operation,buffers,map_ArrayBuffer:postMessage:transfer=false;mapWrite=false
-webgpu:api,operation,buffers,map_ArrayBuffer:postMessage:transfer=false;mapWrite=true
+webgpu:api,operation,buffers,map_oom:mapAsync:oom=true;size=137438953472
+webgpu:api,operation,buffers,map_oom:mappedAtCreation,full_getMappedRange:oom=true;size=137438953472
+webgpu:api,operation,buffers,map_oom:mappedAtCreation,smaller_getMappedRange:oom=true;size=137438953472

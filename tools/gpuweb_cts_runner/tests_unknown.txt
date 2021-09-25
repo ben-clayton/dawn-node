@@ -1,4 +1,3 @@
-webgpu:api,operation,rendering,blending:GPUBlendComponent:component="color";srcFactor="dst-alpha";dstFactor="one-minus-constant";operation="subtract"
-webgpu:api,validation,image_copy,buffer_related:valid:method="CopyB2T";state="destroyed"
-webgpu:api,validation,image_copy,buffer_related:valid:method="CopyT2B";state="destroyed"
 webgpu:api,validation,encoding,queries,general:timestamp_query,query_type_and_index:encoderType="render%20pass";type="occlusion"
+webgpu:api,validation,render_pass_descriptor:OOB_color_attachment_indices_are_handled:colorAttachmentsCount=8
+webgpu:api,validation,render_pass_descriptor:OOB_color_attachment_indices_are_handled:colorAttachmentsCount=9
