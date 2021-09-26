@@ -159,6 +159,10 @@ def main():
                 f.write(v + '\n')
 
     print(f'Total elapsed time: {timer() - start_time:.2f}s')
+    total = sum([len(a) for a in results.values()])
+    print(f'Total tests run: {total}')
+    for (type, values) in results.items():
+        print(f'{type:<10}: {len(values):>5}, {len(values)/total*100:>6.2f}%')
 
 if __name__ == '__main__':
     main()
