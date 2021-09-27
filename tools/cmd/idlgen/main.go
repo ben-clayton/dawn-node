@@ -65,6 +65,10 @@ func run() error {
 	// Open up the output file
 	out := os.Stdout
 	if outputPath != "" {
+		err := os.MkdirAll(filepath.Dir(outputPath), os.ModePerm)
+		if err != nil {
+			return fmt.Errorf("failed to make directories to output file '%v'", outputPath)
+		}
 		file, err := os.Create(outputPath)
 		if err != nil {
 			return fmt.Errorf("failed to open output file '%v'", outputPath)
