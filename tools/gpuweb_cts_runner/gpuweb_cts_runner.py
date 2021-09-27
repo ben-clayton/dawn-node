@@ -4,6 +4,7 @@
 import os
 import sys
 import subprocess
+import platform
 from subprocess import TimeoutExpired, check_output, CalledProcessError
 import multiprocessing as mp
 from multiprocessing import Pool
@@ -111,6 +112,12 @@ def generate_run_dawnnode_js():
     with open(run_dawn_node_js, 'w') as f:
         f.write(to_unix(source))
 
+
+def results_filename(type):
+    # e.g. <script_dir>/tests_fail_windows.txt
+    return script_dir / f'tests_{platform.system().lower()}_{type}.txt'
+
+
 def main():
     start_time = timer()
 
@@ -137,8 +144,7 @@ def main():
         results['unknown'] = m.list()
 
         for (type, values) in results.items():
-            file = script_dir / f'tests_{type}.txt'
-            clear_file_contents(file)
+            clear_file_contents(results_filename(type))
 
         args = [(a,results) for a in all_tests]
         pool.starmap(run_test, args)
@@ -151,7 +157,7 @@ def main():
     pool.join()
 
     for (type, values) in results.items():
-        file = script_dir / f'tests_{type}.txt'
+        file = results_filename(type)
         print(f'Writing sorted results to: {file}')
         with open(file, 'w') as f:
             values.sort()

@@ -1,0 +1,3 @@
+webgpu:api,validation,encoding,queries,general:timestamp_query,query_type_and_index:encoderType="render%20pass";type="occlusion"
+webgpu:api,validation,image_copy,buffer_related:valid:method="CopyB2T";state="destroyed"
+webgpu:api,validation,image_copy,buffer_related:valid:method="CopyT2B";state="destroyed"

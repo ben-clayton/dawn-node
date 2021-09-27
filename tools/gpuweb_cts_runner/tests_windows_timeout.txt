@@ -1,0 +1,2 @@
+webgpu:api,operation,buffers,map_ArrayBuffer:postMessage:transfer=false;mapWrite=false
+webgpu:api,operation,buffers,map_ArrayBuffer:postMessage:transfer=false;mapWrite=true
