@@ -12,10 +12,19 @@ import signal
 from pathlib import Path, PurePosixPath
 from timeit import default_timer as timer
 
+
+def dawn_node_path():
+    if platform.system() == 'Windows':
+        return 'build/RelWithDebInfo/dawnnode.node'
+    if platform.system() == 'Darwin':
+        return 'build/Release/dawnnode.node'
+    return 'build/dawnnode.node'
+
+
 # Tweakables - TODO: make args
 proc_pool_size = 10 #mp.cpu_count()
 test_timeout_sec = 60*5
-dawnnode_module = 'build/dawnnode.node' if not os.name == 'nt' else 'build/RelWithDebInfo/dawnnode.node'
+dawnnode_module = dawn_node_path()
 all_tests_file = 'all_tests.txt'
 # all_tests_file = 'single_test.txt'
 gpuweb_cts_rel_dir = '../gpuweb-cts'
@@ -30,7 +39,7 @@ all_tests_path = script_dir / all_tests_file
 
 def run_process(cmd_args, cwd=None, timeout_sec=None):
     try:
-        output = check_output(args=cmd_args, timeout=timeout_sec, stderr=subprocess.STDOUT, text=True, cwd=cwd)
+        output = check_output(args=cmd_args, timeout=timeout_sec, stderr=subprocess.STDOUT, universal_newlines=True, cwd=cwd)
         return output
     except CalledProcessError as cpe:
         return cpe.output
