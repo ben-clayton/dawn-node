@@ -1,4 +1,8 @@
 
+# Note: This repo holds the origial prototype for dawn-node and is no longer maintained.<br> [Development continues here](https://dawn.googlesource.com/dawn/+/refs/heads/main/src/dawn/node/).
+
+----
+
 ## Fetching deps
 
 ```bash
